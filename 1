@@ -5,6 +5,27 @@ local _Players = game:GetService('Players')
 -- UI
 local u3 = loadstring(game:HttpGet("https://raw.githubusercontent.com/d00xy4b14n/customui/refs/heads/main/ui"))()
 
+_G.BlobGuard = {
+    activeUntil = 0,
+    forceMode   = false,
+}
+function _G.BlobGuard.IsActive()
+    return _G.BlobGuard.forceMode or tick() < _G.BlobGuard.activeUntil
+end
+function _G.BlobGuard.Ping(sec)
+    _G.BlobGuard.activeUntil = tick() + (sec or 2.5)
+end
+function _G.BlobGuard.SetForce(v)
+    _G.BlobGuard.forceMode = v
+end
+
+_G.BlobmanGuardActive = false
+task.spawn(function()
+    while task.wait(0.1) do
+        _G.BlobmanGuardActive = _G.BlobGuard.IsActive()
+    end
+end)
+
 local _Debris = game:GetService('Debris')
 local _Workspace = game:GetService('Workspace')
 local _Lighting = game:GetService('Lighting')
@@ -3175,6 +3196,17 @@ LongReachGrab_Player = v646:MakeTab({
 	PremiumOnly = false,
 })
 
+LongReachGrab_Player:AddSection({ Name = 'Blob Helper' }):AddToggle({
+    Name = 'Force Blob Mode (stops all the antis that may ruin the dish)',
+    Default = false,
+    Callback = function(v)
+        _G.BlobGuard.SetForce(v)
+        u33(v and 'Blob Mode active nyaa' or 'Blob Mode off warawarawarawara')
+    end,
+    Save = true,
+    Flag = 'forceblobmode_toggle',
+})
+
 local v648 = v646:MakeTab({
 	Name = 'Invincibility',
 	Icon = 'rbxassetid://7734056608',
@@ -5543,19 +5575,32 @@ local v914 = v653:AddSection({
 })
 
 local function u917()
-	local _Character5 = _LocalPlayer.Character
-	local v916
+	local char = _LocalPlayer.Character
+	if not char then return false end
 
-	if _Character5 then
-		v916 = _Character5:FindFirstChildOfClass('Humanoid')
-	else
-		v916 = nil
-	end
-	if not (_Character5 and v916) or (not v916.Sit or v916.SeatPart == nil) or tostring(v916.SeatPart.Parent) ~= 'CreatureBlobman' then
+	local hum = char:FindFirstChildOfClass('Humanoid')
+	if not hum or not hum.Sit or not hum.SeatPart then return false end
+
+	local parent = hum.SeatPart.Parent
+	if not parent or not parent:IsA('Model') or parent.Name ~= 'CreatureBlobman' then
 		return false
 	end
 
-	_G.LastBlobmanWasSeat = v916.SeatPart.Parent
+	_G.LastBlobmanWasSeat = parent
+
+	_G.BlobGuard.Ping()
+
+	if not parent:FindFirstChild('LeftDetector') or not parent:FindFirstChild('RightDetector') then
+		pcall(function() hum.Sit = false end)
+		task.spawn(function()
+			task.wait(0.2)
+			local oldBlob = u17:FindFirstChild('CreatureBlobman')
+			if oldBlob == parent then
+				pcall(function() DeleteToyRE:FireServer(oldBlob) end)
+			end
+		end)
+		return false
+	end
 
 	return true
 end
@@ -9606,6 +9651,7 @@ local function u1372()
 					break
 				end
 
+                _G.BlobGuard.Ping()
 				fireproximityprompt(_ProximityPrompt)
 				TeleportPlayer(_VehicleSeat.CFrame + Vector3.new(0, 3.5, 0), 1.5)
 				task.wait(0.1)
@@ -9965,9 +10011,13 @@ loopFire = v1354:AddToggle({
 })
 
 local function u1443(p1429, p1430)
-	local _Humanoid12 = _LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+	local character = _LocalPlayer.Character
+	if not character then return end
+	local _Humanoid12 = character:FindFirstChildOfClass('Humanoid')
+	if not _Humanoid12 then return end
 
 	if u917() then
+		_G.BlobGuard.Ping()
 		local _Parent10 = _Humanoid12.SeatPart.Parent
 		local v1433 = _Players:FindFirstChild(p1429)
 
@@ -10133,28 +10183,31 @@ v1355:AddToggle({
 })
 
 function blobmangraball()
-	local v1449 = _Players
-	local v1450, v1451, v1452 = pairs(v1449:GetPlayers())
+	for _, plr in pairs(_Players:GetPlayers()) do
+		if not u54(plr)
+		   and plr ~= _LocalPlayer
+		   and plr.Character
+		   and plr.Character:FindFirstChild('HumanoidRootPart')
+		   and not (u105(plr.Name) and _G.WhitelistFriends) then
 
-	while true do
-		local v1453
+			local myChar = _LocalPlayer.Character
+			local hum = myChar and myChar:FindFirstChildOfClass('Humanoid')
+			if not hum or not hum.SeatPart then return end
+			local _Parent11 = hum.SeatPart.Parent
+			if not _Parent11 or _Parent11.Name ~= 'CreatureBlobman' then return end
 
-		v1452, v1453 = v1450(v1451, v1452)
+			local leftDet    = _Parent11:FindFirstChild('LeftDetector')
+			local seatScript = _Parent11:FindFirstChild('BlobmanSeatAndOwnerScript')
+			if not (leftDet and seatScript) then return end
 
-		if v1452 == nil then
-			break
+			local leftWeld = leftDet:FindFirstChild('LeftWeld')
+			local grab     = seatScript:FindFirstChild('CreatureGrab')
+			if not (leftWeld and grab) then return end
+
+			_G.BlobGuard.Ping()
+
+			grab:FireServer(leftDet, plr.Character.HumanoidRootPart, leftWeld)
 		end
-		if not u54(v1453) and v1453 ~= _LocalPlayer and v1453.Character and (v1453.Character:FindFirstChild('HumanoidRootPart') and not (u105(v1453.Name) and _G.WhitelistFriends2)) and (_LocalPlayer.Character and _LocalPlayer.Character:FindFirstChildOfClass('Humanoid')) then
-			local _Parent11 = _LocalPlayer.Character:FindFirstChildOfClass('Humanoid').SeatPart.Parent
-			local v1455 = {
-				_Parent11:WaitForChild('LeftDetector'),
-				v1453.Character:FindFirstChild('HumanoidRootPart'),
-				_Parent11:WaitForChild('LeftDetector'):WaitForChild('LeftWeld'),
-			}
-
-			_Parent11:WaitForChild('BlobmanSeatAndOwnerScript'):WaitForChild('CreatureGrab'):FireServer(unpack(v1455))
-		end
-
 		task.wait()
 	end
 end
@@ -10193,15 +10246,23 @@ end
     end
 
     local function spawnBlob()
-        local existing = u17:FindFirstChild('CreatureBlobman')
-        if existing then
-            pcall(function() DeleteToyRE:FireServer(existing) end)
-            task.wait(0.2)
+        local myChar = _LocalPlayer.Character
+        local myHum  = myChar and myChar:FindFirstChildOfClass('Humanoid')
+        if myHum and myHum.Sit and myHum.SeatPart
+           and myHum.SeatPart.Parent
+           and myHum.SeatPart.Parent.Name == 'CreatureBlobman' then
+            _G.BlobGuard.Ping(5)
+            return myHum.SeatPart.Parent
         end
-        local char = _LocalPlayer.Character
-        if not char then return nil end
-        local head = char:FindFirstChild('Head')
+
+        local existing = u17:FindFirstChild('CreatureBlobman')
+        if existing and existing:FindFirstChild('VehicleSeat') then
+            return existing
+        end
+
+        local head = myChar and myChar:FindFirstChild('Head')
         if not head then return nil end
+
         pcall(function()
             SpawnToy({
                 'CreatureBlobman',
@@ -10210,15 +10271,20 @@ end
             })
             BuyToy:InvokeServer('CreatureBlobman')
         end)
-        for i = 1, 60 do
+
+        for _ = 1, 120 do
+            _G.BlobGuard.Ping(3)
             local b = u17:FindFirstChild('CreatureBlobman')
-            if b then return b end
+            if b and b:FindFirstChild('VehicleSeat') then
+                return b
+            end
             task.wait(0.05)
         end
         return nil
     end
 
     local function sitOnBlob(blob)
+        _G.BlobGuard.Ping(5)
         if not blob or not blob.Parent then return false end
         if u917() then return true end
         local seat = blob:FindFirstChildWhichIsA('VehicleSeat', true)
@@ -10282,6 +10348,7 @@ end
 
     local function stop()
         running = false
+        _G.BlobGuard.SetForce(false)
         if renderConn then pcall(function() renderConn:Disconnect() end) renderConn = nil end
         if heartbeatConn then pcall(function() heartbeatConn:Disconnect() end) heartbeatConn = nil end
         if blobman and blobman.Parent then
@@ -10298,6 +10365,14 @@ end
             local char = _LocalPlayer.Character
             local hrp = getRoot()
             if not (char and hrp) then stop() return end
+
+            _G.BlobGuard.SetForce(true)
+            task.spawn(function()
+                while running do
+                    _G.BlobGuard.Ping(3)
+                    task.wait(0.5)
+                end
+            end)
 
             targets = {}
             for _, plr in ipairs(_Players:GetPlayers()) do
@@ -11503,6 +11578,16 @@ _LocalPlayer.CharacterAdded:Connect(reconnect)
                 flag4 = flag4 and task.wait()
                 if not flag4 then break end
 
+                if _G.BlobmanGuardActive then
+                    if v24 and v24.Parent then
+                        pcall(function() tbl17.dt(v24) end)
+                    end
+                    v24, seat, v25, v26, flag3 = nil, nil, nil, nil, false
+                    if connection3 then connection3:Disconnect() connection3 = nil end
+                    task.wait(0.25)
+                    continue
+                end
+
                 local v35
                 v35, v27, v28 = tbl17.charp()
 
@@ -11517,7 +11602,7 @@ _LocalPlayer.CharacterAdded:Connect(reconnect)
                     break
                 end
 
-                if v28.Sit then v28.Sit = false end
+                if v28.Sit and not _G.BlobmanGuardActive then v28.Sit = false end
                 gucciType = S.GucciType
 
                 local flag13 = v24 and v24.Parent and seat and seat.Parent and v26 == gucciType
@@ -11785,7 +11870,7 @@ _LocalPlayer.CharacterAdded:Connect(reconnect)
     task.spawn(function()
         while true do
             task.wait(S.InputLgDelay)
-            if S.AntiInputLag then
+            if S.AntiInputLag and not _G.BlobmanGuardActive then
                 local _,_,h = charp()
                 if h and h.Health > 0 then
                     if not (antiNetItem and antiNetItem.Parent) then
