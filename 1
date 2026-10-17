@@ -1,9 +1,9 @@
-print('hello discord.gg/25ms im d00xy4b14n')
+print('stop exploiting')
 
 local _Players = game:GetService('Players')
 
 -- UI
-local u3 = loadstring(game:HttpGet("https://raw.githubusercontent.com/d00xy4b14n/customui/refs/heads/main/ui"))()
+local u3 = loadstring(game:HttpGet("https://raw.githubusercontent.com/d00xy4b14n/UserInterface/refs/heads/main/ui"))()
 
 _G.BlobGuard = {
     activeUntil = 0,
@@ -1611,7 +1611,7 @@ function controlCreature(p367)
 					end
 					if typeof(v377) == 'RBXScriptConnection' then
 						v377:Disconnect()
-						print('Desconectado!')
+						print('Disconnected!')
 					end
 				end
 
@@ -3175,8 +3175,9 @@ local function u644()
 end
 
 local v645 = u3
-local v646 = u3.MakeWindow(v645, {
-	Name = 'Fling Things and People',
+local v646 = u3:MakeWindow({
+	Name = 'untitled FTAP script',
+	Version = 'v8.7 · Made by dccxy4b14n on discord',
 	HidePremium = true,
 	SaveConfig = true,
 	ConfigFolder = 'FTAPConfig',
@@ -3553,6 +3554,231 @@ local v657 = v646:MakeTab({
 	Icon = 'rbxassetid://7733917120',
 	PremiumOnly = false,
 })
+
+-- ==========================================
+-- GAMEPASSES (FURTHER EXTEND İLE TAM UYUMLU)
+-- ==========================================
+
+local gamepassSec = v657:AddSection({ Name = 'Gamepasses' })
+local fartherReachState = { Enabled = false }
+
+-- Further Reach Line
+gamepassSec:AddToggle({
+    Name = 'Further Reach Line',
+    Default = false,
+    Callback = function(state)
+        local enabled = state
+        if fartherReachState.Enabled == enabled then return end
+
+        if enabled then
+            local gamepassEvents = _ReplicatedStorage:FindFirstChild("GamepassEvents")
+            local menuToys = _ReplicatedStorage:FindFirstChild("MenuToys")
+            local furtherReachBoughtNotifier = gamepassEvents and gamepassEvents:FindFirstChild("FurtherReachBoughtNotifier")
+            local limitedTimeToyEvent = menuToys and menuToys:FindFirstChild("LimitedTimeToyEvent")
+            local fartherReach = _LocalPlayer:FindFirstChild("FartherReach")
+
+            if not (furtherReachBoughtNotifier and furtherReachBoughtNotifier:IsA("RemoteEvent") and limitedTimeToyEvent and limitedTimeToyEvent:IsA("RemoteEvent")) or fartherReach and not fartherReach:IsA("BoolValue") then
+                u33("Further Reach is unavailable: required game objects are missing or invalid.")
+                return
+            end
+
+            fartherReachState.Enabled = true
+            fartherReachState.Notifier = furtherReachBoughtNotifier
+            fartherReachState.Event = limitedTimeToyEvent
+            fartherReachState.Events = gamepassEvents
+            fartherReachState.Toys = menuToys
+
+            local boolValue = fartherReach or Instance.new("BoolValue")
+            fartherReachState.Line = boolValue
+            fartherReachState.LineValue = fartherReach and fartherReach.Value
+
+            boolValue.Name = "FartherReach"
+            boolValue.Value = true
+            boolValue.Parent = _LocalPlayer
+
+            furtherReachBoughtNotifier.Parent = workspace
+            limitedTimeToyEvent.Name = "FurtherReachBoughtNotifier"
+            limitedTimeToyEvent.Parent = gamepassEvents
+
+            local connection
+            local function onCharacter(character)
+                if not connection or not connection.Connected then return end
+                local grabbingScript = character and character:WaitForChild("GrabbingScript", 5)
+                if not (connection.Connected and character == _LocalPlayer.Character and grabbingScript and grabbingScript:IsA("LocalScript")) then return end
+
+                if fartherReachState.Script then
+                    fartherReachState.Script:Disconnect()
+                end
+
+                local function fireEvent()
+                    if connection.Connected and character == _LocalPlayer.Character and grabbingScript.Enabled and limitedTimeToyEvent.Parent then
+                        limitedTimeToyEvent:FireServer()
+                    end
+                end
+
+                grabbingScript.Enabled = false
+                grabbingScript.Enabled = true
+
+                fartherReachState.Script = grabbingScript:GetPropertyChangedSignal("Enabled"):Connect(function()
+                    if grabbingScript.Enabled then
+                        task.delay(1, fireEvent)
+                    end
+                end)
+
+                task.delay(1, fireEvent)
+            end
+
+            connection = _LocalPlayer.CharacterAdded:Connect(onCharacter)
+            fartherReachState.Connection = connection
+            task.spawn(onCharacter, _LocalPlayer.Character)
+        else
+            fartherReachState.Enabled = false
+            if fartherReachState.Connection then fartherReachState.Connection:Disconnect() end
+            if fartherReachState.Script then fartherReachState.Script:Disconnect() end
+
+            if fartherReachState.Line and fartherReachState.Line.Parent then
+                if fartherReachState.LineValue == nil then
+                    fartherReachState.Line:Destroy()
+                else
+                    fartherReachState.Line.Value = fartherReachState.LineValue
+                end
+            end
+
+            if fartherReachState.Event and fartherReachState.Event.Parent and fartherReachState.Toys.Parent then
+                fartherReachState.Event.Name = "LimitedTimeToyEvent"
+                fartherReachState.Event.Parent = fartherReachState.Toys
+            end
+
+            if fartherReachState.Notifier and fartherReachState.Notifier.Parent and fartherReachState.Events.Parent then
+                fartherReachState.Notifier.Parent = fartherReachState.Events
+            end
+
+            local grabbingScript = _LocalPlayer.Character and _LocalPlayer.Character:FindFirstChild("GrabbingScript")
+            if grabbingScript and grabbingScript:IsA("LocalScript") then
+                grabbingScript.Enabled = false
+                grabbingScript.Enabled = true
+            end
+        end
+        -- DİKKAT: grabParts:Destroy() tamamen kaldırıldı!
+        -- Böylece Further Reach açılırken senin tuttuğun obje düşmeyecek.
+    end,
+    Save = true,
+    Flag = 'FartherReach_toggle'
+})
+
+-- Gradient Line
+local gradients = {
+    Color1 = Color3.fromRGB(255, 0, 0),
+    Color2 = Color3.fromRGB(255, 165, 0),
+    Color3 = Color3.fromRGB(255, 255, 0),
+    Color4 = Color3.fromRGB(0, 255, 0),
+    Color5 = Color3.fromRGB(0, 255, 255),
+    Color6 = Color3.fromRGB(0, 0, 255),
+    Color7 = Color3.fromRGB(170, 0, 255),
+    Color8 = Color3.fromRGB(255, 255, 255),
+    DotColor = Color3.fromRGB(255, 255, 255)
+}
+
+gamepassSec:AddToggle({
+    Name = 'Gradient Line',
+    Default = false,
+    Callback = function(state)
+        _G.GradientLineState = state
+        if state then
+            task.spawn(function()
+                while task.wait(0.5) and _G.GradientLineState do
+                    local updateLineColorsEvent = _ReplicatedStorage:FindFirstChild("DataEvents") and _ReplicatedStorage.DataEvents:FindFirstChild("UpdateLineColorsEvent")
+                    if updateLineColorsEvent then
+                        local keys = {
+                            ColorSequenceKeypoint.new(0, gradients.Color1),
+                            ColorSequenceKeypoint.new(0.125, gradients.Color2),
+                            ColorSequenceKeypoint.new(0.25, gradients.Color3),
+                            ColorSequenceKeypoint.new(0.375, gradients.Color4),
+                            ColorSequenceKeypoint.new(0.5, gradients.Color5),
+                            ColorSequenceKeypoint.new(0.625, gradients.Color6),
+                            ColorSequenceKeypoint.new(0.75, gradients.Color7),
+                            ColorSequenceKeypoint.new(0.875, gradients.Color8),
+                            ColorSequenceKeypoint.new(1, gradients.DotColor)
+                        }
+                        updateLineColorsEvent:FireServer(ColorSequence.new(keys), gradients.Color1, gradients.Color2, gradients.Color3, gradients.Color4, gradients.Color5, gradients.Color6, gradients.Color7, gradients.Color8, gradients.DotColor)
+                    end
+                end
+            end)
+        end
+    end,
+    Save = true,
+    Flag = 'GradientLine_toggle'
+})
+
+-- Faster Escape
+gamepassSec:AddToggle({
+    Name = 'Faster Escape',
+    Default = false,
+    Callback = function(state)
+        _G.FasterEscape = state
+    end,
+    Save = true,
+    Flag = 'FasterEscape_toggle'
+})
+
+gamepassSec:AddSlider({
+    Name = 'Faster Escape Delay',
+    Min = 0, Max = 12, Default = 3, Increment = 1,
+    Callback = function(v) _G.FasterEscapeTime = v end,
+    Save = true,
+    Flag = 'FasterEscapeDelay_slider'
+})
+
+_IsHeld:GetPropertyChangedSignal("Value"):Connect(function()
+    if _IsHeld.Value and _G.FasterEscape then
+        local heldTimer = _LocalPlayer:FindFirstChild("HeldTimer")
+        local playerGui = _LocalPlayer:FindFirstChild("PlayerGui")
+        local controlsGui = playerGui and playerGui:FindFirstChild("ControlsGui")
+        local pcf = controlsGui and controlsGui:FindFirstChild("PCFrame")
+        local escape = pcf and pcf:FindFirstChild("Escape")
+        local escapeTime = _G.FasterEscapeTime or 3
+        local endTime = tick() + escapeTime + 1
+
+        while _IsHeld.Value and task.wait() do
+            local timeLeft = math.floor(endTime - tick())
+            if heldTimer then
+                if timeLeft <= 0 then
+                    heldTimer.Value = 0
+                    if escape then escape.Visible = true end
+                else
+                    heldTimer.Value = timeLeft
+                end
+            end
+
+            if timeLeft <= 0 and _UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                pcall(function()
+                    _Struggle:FireServer(_LocalPlayer)
+                end)
+                pcall(function()
+                    _ContextActionService:UnbindAction("Escape")
+                    _ContextActionService:UnbindAction("JumpRemover")
+                end)
+            end
+        end
+        if escape then escape.Visible = false end
+    end
+end)
+
+-- Gamepass Config (Renkler)
+local gamepassConfig = v657:AddSection({ Name = 'Gamepass Config' })
+
+gamepassConfig:AddColorpicker({ Name = 'Line Color 1', Default = gradients.Color1, Callback = function(c) gradients.Color1 = c end, Save = true, Flag = 'LineColor1_picker' })
+gamepassConfig:AddColorpicker({ Name = 'Line Color 2', Default = gradients.Color2, Callback = function(c) gradients.Color2 = c end, Save = true, Flag = 'LineColor2_picker' })
+gamepassConfig:AddColorpicker({ Name = 'Line Color 3', Default = gradients.Color3, Callback = function(c) gradients.Color3 = c end, Save = true, Flag = 'LineColor3_picker' })
+gamepassConfig:AddColorpicker({ Name = 'Line Color 4', Default = gradients.Color4, Callback = function(c) gradients.Color4 = c end, Save = true, Flag = 'LineColor4_picker' })
+gamepassConfig:AddColorpicker({ Name = 'Line Color 5', Default = gradients.Color5, Callback = function(c) gradients.Color5 = c end, Save = true, Flag = 'LineColor5_picker' })
+gamepassConfig:AddColorpicker({ Name = 'Line Color 6', Default = gradients.Color6, Callback = function(c) gradients.Color6 = c end, Save = true, Flag = 'LineColor6_picker' })
+gamepassConfig:AddColorpicker({ Name = 'Line Color 7', Default = gradients.Color7, Callback = function(c) gradients.Color7 = c end, Save = true, Flag = 'LineColor7_picker' })
+gamepassConfig:AddColorpicker({ Name = 'Line Color 8', Default = gradients.Color8, Callback = function(c) gradients.Color8 = c end, Save = true, Flag = 'LineColor8_picker' })
+gamepassConfig:AddColorpicker({ Name = 'Dot Color', Default = gradients.DotColor, Callback = function(c) gradients.DotColor = c end, Save = true, Flag = 'DotColor_picker' })
+
+-- ==========================================
+
 local v659 = v646:MakeTab({
 	Name = 'Config',
 	Icon = 'rbxassetid://7734053495',
@@ -3632,8 +3858,6 @@ if IsMobile() then
 	gui.Parent = _LocalPlayer.PlayerGui
 end
 
-scriptToGetSenv = nil
-senv = nil
 minDistance = 3
 pcDistance = 0
 imageButton = Instance.new('ImageButton')
@@ -3667,22 +3891,21 @@ imageLabelDe.Parent = imageButtonDe
 IncreaseLineExtend = 0
 
 function buttonClicked()
-	if senv and (senv.distance and _G.FutherExtend) then
-		senv.distance = (senv.distance or 0) + IncreaseLineExtend
-
-		if senv.distance < minDistance then
-			senv.distance = minDistance
-		end
-	end
+    if _G.FutherExtend then
+        pcDistance = pcDistance + IncreaseLineExtend
+        if pcDistance < 11 then
+            pcDistance = 11
+        end
+    end
 end
-function buttonClickedDE()
-	if senv and (senv.distance and _G.FutherExtend) then
-		senv.distance = (senv.distance or 0) - IncreaseLineExtend
 
-		if senv.distance < minDistance then
-			senv.distance = minDistance
-		end
-	end
+function buttonClickedDE()
+    if _G.FutherExtend then
+        pcDistance = pcDistance - IncreaseLineExtend
+        if pcDistance < 11 then
+            pcDistance = 11
+        end
+    end
 end
 function toggleButtonState(p693)
 	if p693 and _G.FutherExtend then
@@ -5515,43 +5738,43 @@ SilentAim_Section:AddSlider({
 end)()
 
 FurtherLineExtend_Section = v652:AddSection({
-	Name = 'Line Extender',
+    Name = 'Line Extender',
 })
 
 FurtherLineExtend_Section:AddToggle({
-	Name = 'Further Extend',
-	Default = false,
-	Callback = function(p907)
-		_G.FutherExtend = p907
-	end,
-	Save = true,
-	Flag = 'FurtherLineExtend_toggle',
+    Name = 'Toggle Extend Line',
+    Default = false,
+    Callback = function(p907)
+        _G.FutherExtend = p907
+    end,
+    Save = true,
+    Flag = 'FurtherLineExtend_toggle',
 })
 
 MaxExtendLine = 0
 MinExtendLine = 0
 
 if _UserInputService.TouchEnabled then
-	MinExtendLine = 3
-	MaxExtendLine = 999
+    MinExtendLine = 3
+    MaxExtendLine = 999
 elseif _UserInputService.MouseEnabled then
-	MinExtendLine = 3
-	MaxExtendLine = 999
+    MinExtendLine = 3
+    MaxExtendLine = 999
 end
 
 FurtherLineExtend_Section:AddSlider({
-	Name = 'Increase Extend',
-	Min = MinExtendLine,
-	Max = MaxExtendLine,
-	Default = 3,
-	Color = Color3.fromRGB(255, 255, 255),
-	Increment = 1,
-	ValueName = 'Ammount',
-	Callback = function(p908)
-		IncreaseLineExtend = p908
-	end,
-	Save = true,
-	Flag = 'FurtherLineExtend_slider',
+    Name = 'Extend speed',
+    Min = MinExtendLine,
+    Max = MaxExtendLine,
+    Default = 3,
+    Color = Color3.fromRGB(255, 255, 255),
+    Increment = 1,
+    ValueName = 'Ammount',
+    Callback = function(p908)
+        IncreaseLineExtend = p908
+    end,
+    Save = true,
+    Flag = 'FurtherLineExtend_slider',
 })
 
 local v909 = v653:AddSection({
@@ -7433,14 +7656,14 @@ Bubble_chat = Instance.new('ImageLabel')
 BubbleTextchat = Instance.new('TextLabel')
 typingsoundeffect = Instance.new('Sound', _Workspace)
 typingsoundeffect2 = Instance.new('Sound', _Workspace)
-typingsoundeffect.SoundId = 'rbxassetid://' .. 9120299506
+typingsoundeffect.SoundId = 'rbxassetid://' .. 0
 typingsoundeffect.Volume = 0.345
-typingsoundeffect2.SoundId = 'rbxassetid://' .. 9118870964
-typingsoundeffect2.Volume = 1
+typingsoundeffect2.SoundId = 'rbxassetid://' .. 0
+typingsoundeffect2.Volume = 0
 typingsoundeffect2.PlaybackSpeed = 1.5
 floppadialogo.IgnoreGuiInset = true
 floppadialogo.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
-floppadialogo.Name = 'floppadialogo'
+floppadialogo.Name = ''
 floppadialogo.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 floppadialogo.Parent = _PlayerGui
 floppadialogo.DisplayOrder = 10
@@ -7449,16 +7672,16 @@ floppadialogo.ResetOnSpawn = false
 Floppa.ZIndex = 0
 Floppa.BorderSizePixel = 0
 Floppa.BackgroundColor3 = Color3.new(1, 1, 1)
-Floppa.Image = 'rbxassetid://15668608167'
+Floppa.Image = 'rbxassetid://0'
 Floppa.Size = UDim2.new(0.195372716, 0, 0.305668026, 0)
 Floppa.BorderColor3 = Color3.new(0, 0, 0)
 Floppa.Position = UDim2.new(0.0185752641, 0, 0.661330521, 0)
-Floppa.Name = 'Floppa'
+Floppa.Name = ''
 Floppa.Parent = floppadialogo
 Bubble_chat.BorderSizePixel = 0
 Bubble_chat.Transparency = 1
 Bubble_chatBackgroundColor3 = Color3.new(1, 1, 1)
-Bubble_chat.Image = 'rbxassetid://1395860348'
+Bubble_chat.Image = 'rbxassetid://0'
 Bubble_chat.Size = UDim2.new(1.03356743, 0, 0.79455024, 0)
 Bubble_chat.BorderColor3 = Color3.new(0, 0, 0)
 Bubble_chat.BackgroundTransparency = 1
@@ -7474,7 +7697,7 @@ BubbleTextchat.TextSize = 14
 BubbleTextchat.Size = UDim2.new(0.634431362, 0, 0.268763244, 0)
 BubbleTextchat.TextColor3 = Color3.new(0, 0, 0)
 BubbleTextchat.BorderColor3 = Color3.new(0, 0, 0)
-BubbleTextchat.Text = 'I saved you from falling on the void boi! be careful next time so u dont scare ur dada.'
+BubbleTextchat.Text = ''
 BubbleTextchat.Font = Enum.Font.SourceSans
 BubbleTextchat.Position = UDim2.new(0.18163082, 0, 0.365639389, 0)
 BubbleTextchat.BackgroundTransparency = 1
@@ -7490,38 +7713,7 @@ floppatween = _TweenService.Create(v1209, Floppa, floppatweeninfo1, {
 floppamessageoncooldown = false
 
 function antivoidmesssage()
-	if not floppamessageoncooldown then
-		Floppa.Position = UDim2.new(0.0185752641, 0, 2, 0)
-		floppadialogo.Enabled = true
-		Floppa.Visible = true
-		Bubble_chat.Visible = false
-		BubbleTextchat.Visible = false
-		floppamessageoncooldown = true
-
-		floppatween:Play()
-		floppatween.Completed:Connect(function(p1210)
-			if p1210 == Enum.PlaybackState.Completed then
-				Bubble_chat.Visible = true
-				BubbleTextchat.Visible = true
-				BubbleTextchat.Text = ''
-
-				local v1211 = 'I saved you from falling on the void, my son!'
-
-				for v1212 = 0, #v1211 do
-					BubbleTextchat.Text = string.sub(v1211, 1, v1212)
-
-					typingsoundeffect:Play()
-					task.wait(0.05)
-				end
-
-				task.wait(1)
-				typingsoundeffect2:Play()
-
-				floppadialogo.Enabled = false
-				floppamessageoncooldown = false
-			end
-		end)
-	end
+    return
 end
 
 v1202:AddToggle({
@@ -11008,11 +11200,6 @@ local function reconnect()
 	CharacterRaycastFilter.FilterDescendantsInstances[1] = v1523
 	COAroundPParams.FilterDescendantsInstances[1] = v1523
 	_G.UniversalPlayerRoot = _HumanoidRootPart28
-	scriptToGetSenv = v1523:WaitForChild('GrabbingScript')
-
-	if scriptToGetSenv and getsenv then
-		senv = getsenv(scriptToGetSenv)
-	end
 
 	local _CanBurn = _HumanoidRootPart28:WaitForChild('FirePlayerPart'):WaitForChild('CanBurn')
 	local _Ragdolled3 = u1524:WaitForChild('Ragdolled')
@@ -12512,3 +12699,107 @@ _LocalPlayer.CharacterAdded:Connect(reconnect)
 end)()
 
 u3:Init()
+
+local old_u33 = u33
+u33 = function(p32, title)
+    u3:MakeNotification({
+        Name = title or 'Unnamed FTAP script',
+        Content = p32,
+        Image = 'rbxassetid://16570630989',
+        Time = 5,
+    })
+end
+
+local LineData = {}
+local function FormatPlayer(plr)
+    if typeof(plr) == "Instance" and plr:IsA("Player") then
+        return plr.DisplayName .. " (@" .. plr.Name .. ")"
+    end
+    return "???"
+end
+
+local function LineLagHandler(player, lastPart, cframe)
+    if typeof(lastPart) ~= "Instance" or typeof(cframe) ~= "CFrame" or player == _LocalPlayer then
+        return
+    end
+
+    local data = LineData[player]
+    if not data then
+        data = {
+            Count = 0,
+            FirstTime = 0,
+            LastPart = nil,
+            PartSwitches = 0,
+            IsLagging = false,
+            LastTime = 0,
+            Initialized = false,
+            NotificationCooldown = 0,
+        }
+        LineData[player] = data
+    end
+
+    local now = tick()
+    local playerName = FormatPlayer(player)
+
+    if not data.Initialized then
+        data.FirstTime = now
+        data.Initialized = true
+        return
+    end
+
+    if now - data.FirstTime < 1 then
+        return
+    end
+    
+    local pos = cframe.Position
+    local magnitude = math.abs(pos.X) + math.abs(pos.Y) + math.abs(pos.Z)
+    local isNoQuery = lastPart and lastPart:IsA("BasePart") and lastPart.CanQuery == false
+
+    if data.LastPart and data.LastPart ~= lastPart then
+        data.PartSwitches = data.PartSwitches + 1
+    end
+
+    data.LastPart = lastPart
+
+    if now - data.FirstTime > 2 then
+        data.FirstTime = now
+        data.Count = 0
+        data.PartSwitches = 0
+    end
+
+    data.Count = data.Count + 1
+    data.LastTime = now
+
+    if data.Count >= 20 and (magnitude > 10000 or data.PartSwitches >= 10 or isNoQuery) and not data.IsLagging and now - data.NotificationCooldown >= 3 then
+        data.IsLagging = true
+        data.NotificationCooldown = now
+        u33("Player: " .. playerName .. "\nStatus: Line lag started", "Line Lag Detected")
+    end
+
+    if data.LagCheck then
+        pcall(task.cancel, data.LagCheck)
+        data.LagCheck = nil
+    end
+
+    if data.IsLagging then
+        data.LagCheck = task.delay(2, function()
+            if not LineData[player] then return end
+            if not data.IsLagging then return end
+
+            if tick() - (data.LastTime or 0) >= 2 then
+                data.IsLagging = false
+                data.Count = 0
+                data.PartSwitches = 0
+                
+                if tick() - data.NotificationCooldown >= 3 then
+                    data.NotificationCooldown = tick()
+                    u33("Player: " .. playerName .. "\nStatus: Line lag stopped", "Line Lag Ended")
+                end
+            end
+        end)
+    end
+end
+
+_CreateGrabLine.OnClientEvent:Connect(function(player, part, cframe)
+    LineLagHandler(player, part, cframe)
+end)
