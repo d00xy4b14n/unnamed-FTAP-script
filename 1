@@ -1,9 +1,9 @@
-print('stop exploiting')
+print('i like pizzas')
 
 local _Players = game:GetService('Players')
 
 -- UI
-local u3 = loadstring(game:HttpGet("https://raw.githubusercontent.com/d00xy4b14n/UserInterface/refs/heads/main/ui"))()
+local u3 = loadstring(game:HttpGet("https://raw.githubusercontent.com/d00xy4b14n/UserInterface/refs/heads/main/peak"))()
 
 _G.BlobGuard = {
     activeUntil = 0,
@@ -3544,6 +3544,108 @@ local v655 = v646:MakeTab({
 	Icon = 'rbxassetid://7733964640',
 	PremiumOnly = false,
 })
+;(function()
+    local LPL = {
+        Running = false,
+        Delay = 4,
+        Size = 0.3,
+        AntiDetect = false,
+        Thread = nil
+    }
+
+    local function getPayload()
+        local emojiCount = math.round(LPL.Size * 1048576 / 32)
+        return string.rep("😂😂😂😂🤣🤣🤣🤣", emojiCount)
+    end
+
+    local function sendPacket()
+        local payload = getPayload()
+        local grabEvents = _ReplicatedStorage:FindFirstChild("GrabEvents")
+        if not grabEvents then return end
+
+        local remote = LPL.AntiDetect and grabEvents:FindFirstChild("CreateGrabLine") or grabEvents:FindFirstChild("ExtendGrabLine")
+        if not remote then return end
+
+        for _, plrName in pairs(u70) do
+            local plr = _Players:FindFirstChild(plrName)
+            if plr and plr.Character then
+                local targetPart = plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChild("Head") or plr.Character:FindFirstChild("Torso")
+                if targetPart then
+                    pcall(function()
+                        if LPL.AntiDetect then
+                            remote:FireServer(targetPart, targetPart.CFrame, payload)
+                        else
+                            remote:FireServer(targetPart, payload)
+                        end
+                    end)
+                end
+            end
+        end
+    end
+
+    local sec = v655:AddSection({ Name = 'Packet Lag' })
+
+    sec:AddToggle({
+        Name = 'Enable Packet Lag',
+        Default = false,
+        Callback = function(state)
+            LPL.Running = state
+            if state then
+                if LPL.Thread then task.cancel(LPL.Thread) end
+                LPL.Thread = task.spawn(function()
+                    while LPL.Running do
+                        sendPacket()
+                        task.wait(LPL.Delay)
+                    end
+                end)
+            else
+                if LPL.Thread then
+                    task.cancel(LPL.Thread)
+                    LPL.Thread = nil
+                end
+            end
+        end,
+        Save = true,
+        Flag = 'looppacketlag_toggle'
+    })
+
+    sec:AddSlider({
+        Name = 'Packet Size',
+        Min = 0.1,
+        Max = 19,
+        Default = 0.3,
+        Increment = 0.1,
+        ValueName = 'MB',
+        Callback = function(v) LPL.Size = v end,
+        Save = true,
+        Flag = 'looppacketsize_slider'
+    })
+
+    sec:AddSlider({
+        Name = 'Packet Delay',
+        Min = 0.1,
+        Max = 10,
+        Default = 4,
+        Increment = 0.1,
+        ValueName = 'seconds',
+        Callback = function(v) LPL.Delay = v end,
+        Save = true,
+        Flag = 'looppacketdelay_slider'
+    })
+
+    sec:AddToggle({
+        Name = 'Anti Detect',
+        Default = false,
+        Callback = function(v) LPL.AntiDetect = v end,
+        Save = true,
+        Flag = 'looppacketantidetect_toggle'
+    })
+
+    sec:AddButton({
+        Name = 'Send Packet Once',
+        Callback = function() sendPacket() end
+    })
+end)()
 local v656 = v646:MakeTab({
 	Name = 'Auto',
 	Icon = 'rbxassetid://7733916988',
@@ -3555,14 +3657,9 @@ local v657 = v646:MakeTab({
 	PremiumOnly = false,
 })
 
--- ==========================================
--- GAMEPASSES (FURTHER EXTEND İLE TAM UYUMLU)
--- ==========================================
-
 local gamepassSec = v657:AddSection({ Name = 'Gamepasses' })
 local fartherReachState = { Enabled = false }
 
--- Further Reach Line
 gamepassSec:AddToggle({
     Name = 'Further Reach Line',
     Default = false,
@@ -3659,14 +3756,11 @@ gamepassSec:AddToggle({
                 grabbingScript.Enabled = true
             end
         end
-        -- DİKKAT: grabParts:Destroy() tamamen kaldırıldı!
-        -- Böylece Further Reach açılırken senin tuttuğun obje düşmeyecek.
     end,
     Save = true,
     Flag = 'FartherReach_toggle'
 })
 
--- Gradient Line
 local gradients = {
     Color1 = Color3.fromRGB(255, 0, 0),
     Color2 = Color3.fromRGB(255, 165, 0),
@@ -3710,7 +3804,6 @@ gamepassSec:AddToggle({
     Flag = 'GradientLine_toggle'
 })
 
--- Faster Escape
 gamepassSec:AddToggle({
     Name = 'Faster Escape',
     Default = false,
@@ -3764,7 +3857,6 @@ _IsHeld:GetPropertyChangedSignal("Value"):Connect(function()
     end
 end)
 
--- Gamepass Config (Renkler)
 local gamepassConfig = v657:AddSection({ Name = 'Gamepass Config' })
 
 gamepassConfig:AddColorpicker({ Name = 'Line Color 1', Default = gradients.Color1, Callback = function(c) gradients.Color1 = c end, Save = true, Flag = 'LineColor1_picker' })
@@ -3777,7 +3869,59 @@ gamepassConfig:AddColorpicker({ Name = 'Line Color 7', Default = gradients.Color
 gamepassConfig:AddColorpicker({ Name = 'Line Color 8', Default = gradients.Color8, Callback = function(c) gradients.Color8 = c end, Save = true, Flag = 'LineColor8_picker' })
 gamepassConfig:AddColorpicker({ Name = 'Dot Color', Default = gradients.DotColor, Callback = function(c) gradients.DotColor = c end, Save = true, Flag = 'DotColor_picker' })
 
--- ==========================================
+local cheaterSec = v657:AddSection({ Name = 'Cheaters' })
+
+cheaterSec:AddButton({
+    Name = 'Find Cheaters',
+    Callback = function()
+        local cheaters = {}
+        for _, plr in ipairs(_Players:GetPlayers()) do
+            if plr ~= _LocalPlayer then
+                local char = plr.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass('Humanoid')
+                    local hrp = char:FindFirstChild('HumanoidRootPart')
+                    if hum and hrp then
+                        local seatPart = hum.SeatPart
+                        if seatPart then
+                            local seatWeld = seatPart:FindFirstChild('SeatWeld')
+                            if not seatWeld or not seatWeld.Enabled then
+                                cheaters[plr] = "Has Gucci"
+                            end
+                        end
+
+                        if not cheaters[plr] then
+                            local function hasSticky(part)
+                                if not part or not part.Parent then return false end
+                                for _, connected in ipairs(part:GetConnectedParts()) do
+                                    if connected.Name == 'StickyPart' then return true end
+                                end
+                                return false
+                            end
+
+                            local ragdollHitbox = hrp:FindFirstChild('RagdollTouchedHitbox')
+                            local firePlayerPart = hrp:FindFirstChild('FirePlayerPart')
+                            if hasSticky(hrp) or hasSticky(ragdollHitbox) or hasSticky(firePlayerPart) then
+                                cheaters[plr] = "Shuriken in HRP"
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        if not next(cheaters) then
+            return u33("Cheaters not found!")
+        end
+
+        local msg = "Cheaters Found\n\n"
+        for plr, reason in pairs(cheaters) do
+            msg = msg .. ("[%s]\n%s\n\n"):format(plr.Name, reason)
+        end
+
+        u33(msg:sub(1, -3)) 
+    end
+})
 
 local v659 = v646:MakeTab({
 	Name = 'Config',
@@ -5756,14 +5900,14 @@ MinExtendLine = 0
 
 if _UserInputService.TouchEnabled then
     MinExtendLine = 3
-    MaxExtendLine = 999
+    MaxExtendLine = 50
 elseif _UserInputService.MouseEnabled then
     MinExtendLine = 3
-    MaxExtendLine = 999
+    MaxExtendLine = 50
 end
 
 FurtherLineExtend_Section:AddSlider({
-    Name = 'Extend speed',
+    Name = 'Extend Length',
     Min = MinExtendLine,
     Max = MaxExtendLine,
     Default = 3,
@@ -7153,6 +7297,7 @@ local ThirdPersonSection = v657:AddSection({
 
 local RunService = game:GetService("RunService")
 local _thirdPersonLoop = nil
+local _forceFirstPersonLoop = nil
 
 local function _applyThirdPerson(on)
     local success = pcall(function()
@@ -7164,19 +7309,17 @@ local function _applyThirdPerson(on)
             _thirdPersonLoop:Disconnect()
             _thirdPersonLoop = nil
         end
+        if _forceFirstPersonLoop then
+            _forceFirstPersonLoop:Disconnect()
+            _forceFirstPersonLoop = nil
+        end
 
         if on then
             camera.CameraType = Enum.CameraType.Custom
             _LocalPlayer.CameraMode = Enum.CameraMode.Classic
             _LocalPlayer.DevEnableMouseLock = true
             _LocalPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Invisicam
-
-            _LocalPlayer.CameraMinZoomDistance = 10
-            _LocalPlayer.CameraMaxZoomDistance = 10
-            task.defer(function()
-                _LocalPlayer.CameraMinZoomDistance = 0.5
-                _LocalPlayer.CameraMaxZoomDistance = 9999
-            end)
+            _LocalPlayer.CameraMaxZoomDistance = 9999
 
             if humanoid and camera.CameraSubject ~= humanoid then
                 camera.CameraSubject = humanoid
@@ -7185,11 +7328,9 @@ local function _applyThirdPerson(on)
             _thirdPersonLoop = RunService.RenderStepped:Connect(function()
                 local cam = workspace.CurrentCamera
                 if not cam then return end
-
                 if cam.CameraType ~= Enum.CameraType.Custom then
                     cam.CameraType = Enum.CameraType.Custom
                 end
-
                 local char = _LocalPlayer.Character
                 local hum = char and char:FindFirstChildOfClass("Humanoid")
                 if hum and cam.CameraSubject ~= hum then
@@ -7198,11 +7339,34 @@ local function _applyThirdPerson(on)
             end)
         else
             camera.CameraType = Enum.CameraType.Custom
-            _LocalPlayer.CameraMode = Enum.CameraMode.Classic
+            _LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
             _LocalPlayer.DevEnableMouseLock = false
             _LocalPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Zoom
-            _LocalPlayer.CameraMaxZoomDistance = 400
+            _LocalPlayer.CameraMaxZoomDistance = 0.5
             _LocalPlayer.CameraMinZoomDistance = 0.5
+
+            if humanoid and camera.CameraSubject ~= humanoid then
+                camera.CameraSubject = humanoid
+            end
+
+            _forceFirstPersonLoop = RunService.RenderStepped:Connect(function()
+                local cam = workspace.CurrentCamera
+                if not cam then return end
+                if cam.CameraType ~= Enum.CameraType.Custom then
+                    cam.CameraType = Enum.CameraType.Custom
+                end
+                if _LocalPlayer.CameraMode ~= Enum.CameraMode.LockFirstPerson then
+                    _LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+                end
+                if _LocalPlayer.CameraMaxZoomDistance ~= 0.5 then
+                    _LocalPlayer.CameraMaxZoomDistance = 0.5
+                end
+                local char = _LocalPlayer.Character
+                local hum = char and char:FindFirstChildOfClass("Humanoid")
+                if hum and cam.CameraSubject ~= hum then
+                    cam.CameraSubject = hum
+                end
+            end)
         end
     end)
     return success
@@ -7217,6 +7381,10 @@ ThirdPersonSection:AddToggle({
     Save = true,
     Flag = 'thirdperson_toggle',
 })
+
+task.defer(function()
+    _applyThirdPerson(false)
+end)
 
 local v1151 = v657:AddSection({
 	Name = 'Annoy Players',
@@ -8319,6 +8487,57 @@ ESP_Section2:AddToggle({
 		end
 	end,
 })
+
+;(function()
+    local ClickTPSection = v651:AddSection({ Name = 'Click TP' })
+    local clickTPEnabled = false
+
+    local function clicktpFunc()
+        local character = _LocalPlayer.Character
+        if not character then return end
+
+        local root = character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Torso")
+        if not root then return end
+        
+        local mouse = _LocalPlayer:GetMouse()
+        
+        if not mouse.Target then return end
+        
+        local pos = mouse.Hit
+
+        if (root.Position - pos.Position).Magnitude <= 600 then
+            root.CFrame = CFrame.new(pos.X, pos.Y + 3, pos.Z, select(4, root.CFrame:components()))
+            breakVelocity()
+        end
+    end
+
+    ClickTPSection:AddToggle({
+        Name = 'Enable Click TP',
+        Default = false,
+        Save = true,
+        Flag = 'ClickTP_toggle',
+        Callback = function(state)
+            clickTPEnabled = state
+        end
+    })
+    
+    local keybindCtrl = ClickTPSection:Keybind('Click TP Keybind', Enum.KeyCode.X, function() end)
+
+    _UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed or not clickTPEnabled then return end
+        
+        local currentKey = nil
+        if keybindCtrl and keybindCtrl.Get then
+            currentKey = keybindCtrl:Get()
+        end
+        
+        if not currentKey then currentKey = Enum.KeyCode.X end
+
+        if input.KeyCode == currentKey then
+            clicktpFunc()
+        end
+    end)
+end)()
 
 MapTeleport_Section = v651:AddSection({
 	Name = 'Place TP',
