@@ -1,4 +1,4 @@
-print('i like pizzas')
+print('also check out finite yield fe!')
 
 local _Players = game:GetService('Players')
 
@@ -3699,22 +3699,33 @@ gamepassSec:AddToggle({
 
             local connection
             local function onCharacter(character)
-                if not connection or not connection.Connected then return end
+                if not connection.Connected or not fartherReachState.Enabled then return end
                 local grabbingScript = character and character:WaitForChild("GrabbingScript", 5)
-                if not (connection.Connected and character == _LocalPlayer.Character and grabbingScript and grabbingScript:IsA("LocalScript")) then return end
+                if not (connection.Connected and fartherReachState.Enabled 
+                    and character == _LocalPlayer.Character and grabbingScript 
+                    and grabbingScript.Parent == character and grabbingScript:IsA("LocalScript")) then 
+                    return 
+                end
 
                 if fartherReachState.Script then
                     fartherReachState.Script:Disconnect()
                 end
 
                 local function fireEvent()
-                    if connection.Connected and character == _LocalPlayer.Character and grabbingScript.Enabled and limitedTimeToyEvent.Parent then
+                    if connection.Connected and fartherReachState.Enabled 
+                        and character == _LocalPlayer.Character and grabbingScript.Parent == character 
+                        and grabbingScript.Enabled and limitedTimeToyEvent.Parent then
                         limitedTimeToyEvent:FireServer()
                     end
                 end
 
-                grabbingScript.Enabled = false
-                grabbingScript.Enabled = true
+                task.wait(0.15)
+                if grabbingScript.Parent and grabbingScript:IsA("LocalScript") then
+                    local wasEnabled = grabbingScript.Enabled
+                    grabbingScript.Enabled = false
+                    task.wait()
+                    grabbingScript.Enabled = true
+                end
 
                 fartherReachState.Script = grabbingScript:GetPropertyChangedSignal("Enabled"):Connect(function()
                     if grabbingScript.Enabled then
@@ -3748,12 +3759,6 @@ gamepassSec:AddToggle({
 
             if fartherReachState.Notifier and fartherReachState.Notifier.Parent and fartherReachState.Events.Parent then
                 fartherReachState.Notifier.Parent = fartherReachState.Events
-            end
-
-            local grabbingScript = _LocalPlayer.Character and _LocalPlayer.Character:FindFirstChild("GrabbingScript")
-            if grabbingScript and grabbingScript:IsA("LocalScript") then
-                grabbingScript.Enabled = false
-                grabbingScript.Enabled = true
             end
         end
     end,
@@ -8491,6 +8496,7 @@ ESP_Section2:AddToggle({
 ;(function()
     local ClickTPSection = v651:AddSection({ Name = 'Click TP' })
     local clickTPEnabled = false
+    local clickTPKey = Enum.KeyCode.X
 
     local function clicktpFunc()
         local character = _LocalPlayer.Character
@@ -8500,14 +8506,19 @@ ESP_Section2:AddToggle({
         if not root then return end
         
         local mouse = _LocalPlayer:GetMouse()
-        
         if not mouse.Target then return end
         
         local pos = mouse.Hit
 
         if (root.Position - pos.Position).Magnitude <= 600 then
             root.CFrame = CFrame.new(pos.X, pos.Y + 3, pos.Z, select(4, root.CFrame:components()))
-            breakVelocity()
+            
+            if breakVelocity then 
+                breakVelocity() 
+            end
+            
+            root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
         end
     end
 
@@ -8520,20 +8531,19 @@ ESP_Section2:AddToggle({
             clickTPEnabled = state
         end
     })
-    
-    local keybindCtrl = ClickTPSection:Keybind('Click TP Keybind', Enum.KeyCode.X, function() end)
+
+    ClickTPSection:AddKeybind({
+        Name = 'Click TP Keybind',
+        Default = Enum.KeyCode.X,
+        Flag = 'ClickTP_key',
+        Callback = function(key)
+            clickTPKey = key 
+        end
+    })
 
     _UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed or not clickTPEnabled then return end
-        
-        local currentKey = nil
-        if keybindCtrl and keybindCtrl.Get then
-            currentKey = keybindCtrl:Get()
-        end
-        
-        if not currentKey then currentKey = Enum.KeyCode.X end
-
-        if input.KeyCode == currentKey then
+        if input.KeyCode == clickTPKey then
             clicktpFunc()
         end
     end)
@@ -9279,84 +9289,114 @@ v1337:AddButton({
 	end,
 })
 
-local ConfigSection = v659:AddSection({
-    Name = 'Config',
-})
+;(function()
+    local ConfigSection = v659:AddSection({
+        Name = 'Config Management',
+    })
 
-local ConfigNameBox = ConfigSection:AddInput({
-    Name = 'Config Name',
-    Default = 'default',
-})
+    local ConfigNameBox = ConfigSection:AddInput({
+        Name = 'Config Name',
+        Default = 'default',
+    })
 
-ConfigSection:AddButton({
-    Name = 'Save (also sets AutoLoad)',
-    Callback = function()
-        local name = ConfigNameBox:Get() or 'default'
-        if u3:SaveConfig(name, true) then
-            u33('Saved + AutoLoad set: ' .. name)
-        else
-            u33('Save failed: ' .. name)
-        end
-    end,
-})
+    local initialConfigs = u3:ListConfigs()
+    if #initialConfigs == 0 then initialConfigs = { 'default' } end
+    
+    local SelectedConfig = initialConfigs[1] or 'default'
 
-ConfigSection:AddButton({
-    Name = 'Load (also sets AutoLoad)',
-    Callback = function()
-        local name = ConfigNameBox:Get() or 'default'
-        if u3:LoadConfig(name, true) then
-            u33('Loaded + AutoLoad set: ' .. name)
-        else
-            u33('Load failed: ' .. name)
-        end
-    end,
-})
+    local ConfigListDropdown = ConfigSection:AddDropdown({
+        Name = 'Select Config',
+        Options = initialConfigs,
+        Default = SelectedConfig,
+        Callback = function(selected)
+            SelectedConfig = selected
+            if ConfigNameBox and ConfigNameBox.Set then
+                ConfigNameBox:Set(selected) 
+            end
+        end,
+    })
 
-ConfigSection:AddButton({
-    Name = 'Reload AutoLoad',
-    Callback = function()
-        if u3:ApplyAutoLoad() then
-            u33('AutoLoad applied')
-        else
-            u33('No AutoLoad config found')
-        end
-    end,
-})
-
-ConfigSection:AddButton({
-    Name = 'Clear AutoLoad',
-    Callback = function()
-        if u3:ClearAutoLoad() then
-            u33('AutoLoad cleared')
-        else
-            u33('Nothing to clear')
-        end
-    end,
-})
-
-ConfigSection:AddButton({
-    Name = 'Delete Config',
-    Callback = function()
-        local name = ConfigNameBox:Get() or 'default'
-        if u3:DeleteConfig(name) then
-            u33('Deleted: ' .. name)
-        else
-            u33('Not found: ' .. name)
-        end
-    end,
-})
-
-ConfigSection:AddButton({
-    Name = 'List Configs',
-    Callback = function()
+    local function RefreshConfigs()
         local list = u3:ListConfigs()
-        if #list == 0 then
-            u33('No configs found')
-        else
-            u33(table.concat(list, ', '))
-        end
-    end,
-})
+        if #list == 0 then list = { 'default' } end
+        ConfigListDropdown:Refresh(list, true)
+    end
+
+    ConfigSection:AddButton({
+        Name = 'Save Config',
+        Callback = function()
+            local name = ConfigNameBox:Get() or 'default'
+            if u3:SaveConfig(name, false) then -- Zorla autoload yapmaz
+                u33('Saved: ' .. name)
+                RefreshConfigs()
+            else
+                u33('Save failed: ' .. name)
+            end
+        end,
+    })
+
+    ConfigSection:AddButton({
+        Name = 'Load Selected Config',
+        Callback = function()
+            local name = SelectedConfig
+            if name and name ~= "" then
+                if u3:LoadConfig(name, false) then 
+                    u33('Loaded: ' .. name)
+                else
+                    u33('Load failed: ' .. name)
+                end
+            end
+        end,
+    })
+
+    ConfigSection:AddButton({
+        Name = 'Delete Selected Config',
+        Callback = function()
+            local name = SelectedConfig
+            if name and name ~= "" then
+                if u3:DeleteConfig(name) then
+                    u33('Deleted: ' .. name)
+                    RefreshConfigs()
+                else
+                    u33('Not found: ' .. name)
+                end
+            end
+        end,
+    })
+
+    ConfigSection:AddButton({
+        Name = 'Refresh List',
+        Callback = function() RefreshConfigs() end,
+    })
+
+    -- BURADAKİ SORUN: AddDivider yok, onun yerine AddLabel kullanıyoruz
+    ConfigSection:AddLabel("AutoLoad Settings") 
+
+    ConfigSection:AddButton({
+        Name = 'Set Selected as AutoLoad',
+        Callback = function()
+            local name = SelectedConfig
+            if name and name ~= "" then
+                if u3:SetAutoLoad(name) then
+                    u33('AutoLoad set to: ' .. name)
+                else
+                    u33('Failed to set AutoLoad.')
+                end
+            end
+        end,
+    })
+
+    ConfigSection:AddButton({
+        Name = 'Clear AutoLoad',
+        Callback = function()
+            if u3:ClearAutoLoad() then
+                u33('AutoLoad cleared.')
+            else
+                u33('Nothing to clear.')
+            end
+        end,
+    })
+end)()
 
 local v1346 = v659:AddSection({
 	Name = 'Blobman Loopkick',
@@ -11424,13 +11464,14 @@ local function reconnect()
 	local _Ragdolled3 = u1524:WaitForChild('Ragdolled')
 
 	if true then
-		local u1528 = _HumanoidRootPart28 and _HumanoidRootPart28:FindFirstChild('RootAttachment')
-
-		if u1528 then
-			task.delay(1, function()
-				u1528:Destroy()
-			end)
-		end
+        if _G.RemoveRootAttachmentForBlobDefense then
+            local u1528 = _HumanoidRootPart28 and _HumanoidRootPart28:FindFirstChild('RootAttachment')
+            if u1528 then
+                task.delay(1, function()
+                    if u1528.Parent then u1528:Destroy() end
+                end)
+            end
+        end
 
 		setMasslessFalse(v1523)
 		enforceMasslessFalse(v1523)
