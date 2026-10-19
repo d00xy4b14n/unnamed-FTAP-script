@@ -1,4 +1,4 @@
-print('also check out finite yield fe!')
+print('also check out finite yield fe!!!')
 
 local _Players = game:GetService('Players')
 
@@ -3529,7 +3529,6 @@ local v653 = v646:MakeTab({
                 pcall(task.cancel, auraThread)
                 auraThread = nil
             end
-            u33("Limb Aura reset")
         end,
     })
 end)()
@@ -7657,7 +7656,7 @@ bringalltoggle = v1153:AddToggle({
 				_G.BringAll = false
 
 				bringalltoggle:Set(false)
-				u33('Only for premium users! Buy premium in my discord server!')
+				u33('Only for premium users!')
 
 				return
 			end
@@ -7817,7 +7816,7 @@ counterdropdownselection = v1203:AddDropdown({
 	Callback = function(p1208)
 		if p1208 == 'Kick' and GetKey() ~= 'Xana' then
 			counterdropdownselection:Set('Repulsion')
-			u33('Only for premium users! Buy premium in my discord server!')
+			u33('Only for premium!')
 		else
 			_G.CounterMode = p1208
 		end
@@ -8896,7 +8895,7 @@ LagServerToggle = v1296:AddToggle({
 		while laggg do
 			if GetKey() ~= 'Xana' then
 				LagServerToggle:Set(false)
-				u33('Only for premium users! Buy premium in my discord server!')
+				u33('Only for premium users!')
 
 				break
 			end
@@ -9290,111 +9289,100 @@ v1337:AddButton({
 })
 
 ;(function()
-    local ConfigSection = v659:AddSection({
-        Name = 'Config Management',
-    })
-
-    local ConfigNameBox = ConfigSection:AddInput({
-        Name = 'Config Name',
-        Default = 'default',
-    })
-
-    local initialConfigs = u3:ListConfigs()
-    if #initialConfigs == 0 then initialConfigs = { 'default' } end
+    local ConfigSection = v659:AddSection({ Name = 'Config Management' })
     
-    local SelectedConfig = initialConfigs[1] or 'default'
-
-    local ConfigListDropdown = ConfigSection:AddDropdown({
+    local configs = u3:ListConfigs()
+    if #configs == 0 then configs = { 'default' } end
+    local selected = configs[1] or 'default'
+    
+    local Dropdown = ConfigSection:AddDropdown({
         Name = 'Select Config',
-        Options = initialConfigs,
-        Default = SelectedConfig,
-        Callback = function(selected)
-            SelectedConfig = selected
-            if ConfigNameBox and ConfigNameBox.Set then
-                ConfigNameBox:Set(selected) 
-            end
-        end,
+        Options = configs,
+        Default = selected,
+        Callback = function(val) 
+            selected = val 
+        end
     })
 
-    local function RefreshConfigs()
+    local NameInput = ConfigSection:AddInput({
+        Name = 'New Config Name (For Save As)',
+        Default = '',
+        Placeholder = 'Type a name to create new...'
+    })
+
+    local function Refresh(selectName)
         local list = u3:ListConfigs()
         if #list == 0 then list = { 'default' } end
-        ConfigListDropdown:Refresh(list, true)
-    end
-
-    ConfigSection:AddButton({
-        Name = 'Save Config',
-        Callback = function()
-            local name = ConfigNameBox:Get() or 'default'
-            if u3:SaveConfig(name, false) then -- Zorla autoload yapmaz
-                u33('Saved: ' .. name)
-                RefreshConfigs()
-            else
-                u33('Save failed: ' .. name)
+        Dropdown:Refresh(list, false) 
+        
+        if selectName then
+            if not table.find(list, selectName) then
+                table.insert(list, selectName)
+                Dropdown:Refresh(list, false)
             end
-        end,
-    })
+            Dropdown:Set(selectName)
+            selected = selectName
+        end
+    end
 
     ConfigSection:AddButton({
         Name = 'Load Selected Config',
         Callback = function()
-            local name = SelectedConfig
-            if name and name ~= "" then
-                if u3:LoadConfig(name, false) then 
-                    u33('Loaded: ' .. name)
-                else
-                    u33('Load failed: ' .. name)
-                end
+            if selected then
+                u3:LoadConfig(selected, false)
+                Refresh(selected)
+                u33('The Config :' .. tostring(selected) .. ' Loaded!', 'Config')
             end
-        end,
+        end
     })
 
+    ConfigSection:AddButton({
+        Name = 'Save Config',
+        Callback = function()
+            local newName = NameInput:Get()
+            if newName and newName:gsub("%s", "") ~= "" then
+                u3:SaveConfig(newName, false)
+                Refresh(newName)
+                NameInput:Set("")
+            else
+                if selected then
+                    u3:SaveConfig(selected, false)
+                    Refresh(selected)
+                    u33('The Config :' .. tostring(selected) .. ' Saved!', 'Config')
+                end
+            end
+        end
+    })
+    
     ConfigSection:AddButton({
         Name = 'Delete Selected Config',
         Callback = function()
-            local name = SelectedConfig
-            if name and name ~= "" then
-                if u3:DeleteConfig(name) then
-                    u33('Deleted: ' .. name)
-                    RefreshConfigs()
-                else
-                    u33('Not found: ' .. name)
-                end
+            if selected then
+                u3:DeleteConfig(selected)
+                Refresh()
+                u33('The Config :' .. tostring(selected) .. ' Deleted!', 'Config')
             end
-        end,
+        end
     })
 
-    ConfigSection:AddButton({
-        Name = 'Refresh List',
-        Callback = function() RefreshConfigs() end,
-    })
-
-    -- BURADAKİ SORUN: AddDivider yok, onun yerine AddLabel kullanıyoruz
-    ConfigSection:AddLabel("AutoLoad Settings") 
+    ConfigSection:AddLabel("AutoLoad Settings")
 
     ConfigSection:AddButton({
         Name = 'Set Selected as AutoLoad',
         Callback = function()
-            local name = SelectedConfig
-            if name and name ~= "" then
-                if u3:SetAutoLoad(name) then
-                    u33('AutoLoad set to: ' .. name)
-                else
-                    u33('Failed to set AutoLoad.')
-                end
+            if selected then
+                u3:SetAutoLoad(selected)
+                u33('Autoload Selected!')
             end
-        end,
+        end
     })
 
     ConfigSection:AddButton({
         Name = 'Clear AutoLoad',
         Callback = function()
-            if u3:ClearAutoLoad() then
-                u33('AutoLoad cleared.')
-            else
-                u33('Nothing to clear.')
-            end
-        end,
+            u3:ClearAutoLoad()
+            u33('Autoload Cleared!')
+        end
     })
 end)()
 
@@ -10027,7 +10015,7 @@ v1352:AddButton({
 	Callback = function()
 		if not table.find(u70, _G.PlayerToAdd) then
 			if u1359 <= #u70 then
-				u33('You reached the max ammount of players in loop, buy premium to unlock more space!')
+				u33('You reached the max ammount of players in loop')
 			else
 				table.insert(u70, _G.PlayerToAdd)
 				u79(u1358, u70)
