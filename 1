@@ -1,9 +1,9 @@
-print('also check out finite yield fe!!!')
+print('i like femboys')
 
 local _Players = game:GetService('Players')
 
 -- UI
-local u3 = loadstring(game:HttpGet("https://raw.githubusercontent.com/d00xy4b14n/UserInterface/refs/heads/main/peak"))()
+local u3 = loadstring(game:HttpGet("https://raw.githubusercontent.com/d00xy4b14n/UserInterface/refs/heads/main/mangos"))()
 
 _G.BlobGuard = {
     activeUntil = 0,
@@ -3180,7 +3180,7 @@ local v646 = u3:MakeWindow({
 	Version = 'v8.7 · Made by dccxy4b14n on discord',
 	HidePremium = true,
 	SaveConfig = true,
-	ConfigFolder = 'FTAPConfig',
+	ConfigFolder = 'Unnamed FTAP Script FW howpper',
 	IntroEnabled = false,
 	KeyToOpenWindow = 'M',
 	FreeMouse = true,
@@ -3295,12 +3295,2687 @@ Esp_Tab = v646:MakeTab({
 	Icon = 'rbxassetid://7733774602',
 	PremiumOnly = false,
 })
-
 local v650 = v646:MakeTab({
-	Name = 'Explosions',
+	Name = 'Toys',
 	Icon = 'rbxassetid://17837704089',
 	PremiumOnly = false,
 })
+
+;(function()
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local UserInputService = game:GetService("UserInputService")
+
+	local localPlayer = Players.LocalPlayer
+	local currentCamera = workspace.CurrentCamera
+	local mouse = localPlayer:GetMouse()
+	local map = workspace:WaitForChild("Map")
+	local v17 = workspace:WaitForChild(localPlayer.Name .. "SpawnedInToys")
+	local inPlot = localPlayer:WaitForChild("InPlot")
+	local inOwnedPlot = localPlayer:WaitForChild("InOwnedPlot")
+
+	local function getLastRow(section)
+		local els = section and section.elements
+		return els and els[#els] and els[#els].frame or nil
+	end
+
+	local function addIntSlider(section, opts)
+		local origCb = opts.Callback
+		local lastInt = nil
+		local rowFrame = nil
+
+		local ctrl = section:AddSlider({
+			Name = opts.Name,
+			Min = opts.Min,
+			Max = opts.Max,
+			Default = math.floor((opts.Default or opts.Min or 0) + 0.5),
+			Flag = opts.Flag,
+			Save = opts.Save,
+			Callback = function(v)
+				local iv = math.floor(tonumber(v) + 0.5)
+				if iv ~= lastInt then
+					lastInt = iv
+					if origCb then origCb(iv) end
+				end
+			end,
+		})
+
+		rowFrame = getLastRow(section)
+		if rowFrame then
+			for _, ch in ipairs(rowFrame:GetChildren()) do
+				if ch:IsA("TextLabel") and ch.TextXAlignment == Enum.TextXAlignment.Right then
+					local fixing = false
+					local function fixText()
+						if fixing then return end
+						local n = tonumber(ch.Text)
+						if n then
+							local s = tostring(math.floor(n + 0.5))
+							if ch.Text ~= s then
+								fixing = true
+								ch.Text = s
+								fixing = false
+							end
+						end
+					end
+					ch:GetPropertyChangedSignal("Text"):Connect(fixText)
+					fixText()
+					break
+				end
+			end
+		end
+
+		return ctrl, rowFrame
+	end
+
+	local function fn18(msg, title, dur)
+		u3:MakeNotification({
+			Name = title or "Resonance Toys",
+			Content = tostring(msg or ""),
+			Time = dur or 4,
+		})
+	end
+
+	local function fn21_remote(arg, arg2, arg3)
+		local suffix = arg3 and "" or "Events"
+		local folder = ReplicatedStorage:WaitForChild(arg .. suffix, 0.5)
+		return folder and folder:WaitForChild(arg2, 0.5)
+	end
+
+	local tbl11 = {
+		SetNetworkOwner = fn21_remote("Grab", "SetNetworkOwner"),
+		DestroyGrabLine = fn21_remote("Grab", "DestroyGrabLine"),
+		StickyPartEvent = fn21_remote("Player", "StickyPartEvent"),
+		SpawnToy = fn21_remote("MenuToys", "SpawnToyRemoteFunction", true),
+		DestroyToy = fn21_remote("MenuToys", "DestroyToy", true),
+		Explode = fn21_remote("Bomb", "BombExplode"),
+	}
+
+	local tbl8 = {
+		PositionPrediction = false,
+		DirectGrab = false,
+		AutoExplodeTarget = false,
+		CoconutForms = false,
+		EyeLaserActive = false,
+	}
+
+	local tbl9 = {
+		ExplosionMethod = "BombMissile",
+		MissilesToFire = 1,
+		SelectedTAPlayer = nil,
+	}
+
+	local tbl7 = {
+		PlayerList = Players:GetPlayers(),
+		SelectedPlayersExp = {},
+		Inventories = {},
+		GrabbableParts = {},
+		FailedToys = {},
+		BrokenPlots = {},
+		PartOwnerCache = setmetatable({}, { __mode = "k" }),
+		ToyAuraReserved = setmetatable({}, { __mode = "k" }),
+		ToyAuraRoots = setmetatable({}, { __mode = "k" }),
+		AnimationWhitelist = { ["180426354"] = true, ["168268306"] = true },
+		States = {},
+		SpawnQueue = {},
+		SpawnOrder = 0,
+		RuntimeConnections = {},
+		ToysAuraSettings = {
+			Enabled = false,
+			LimitEnabled = false,
+			Limit = 100,
+			OwnInventoryOnly = false,
+			FilterToysEnabled = false,
+			AllowedToys = {},
+			SelectedFilterToy = "Sparkler",
+			AutoRotate = false,
+			AutoMove = false,
+			Bob = false,
+			RotationSpeed = 1.5,
+			MoveSpeed = 5,
+			BobSpeed = 2,
+			BobHeight = 3,
+			Rotation = Vector3.zero,
+			Offset = CFrame.new(0, 10, 0),
+			Collisions = false,
+			Models = {},
+			Shape = "Circle",
+			Center = CFrame.new(0, 50, 0),
+			CustomPos = CFrame.new(0, 50, 0),
+			Spacing = 1,
+			Radius = 20,
+			Height = 20,
+			Rows = 5,
+			Rotations = 3,
+			Responsiveness = 55,
+			FaceCenter = true,
+			OwnType = "Aura",
+			PosType = "You",
+		},
+		CoconutForms = {
+			Selected = {},
+			Order = {},
+			Offsets = {},
+			Models = {},
+			Parts = {},
+			WingRipple = {},
+			Acquiring = {},
+			Names = { "Boobs", "Ass", "Penis", "Wings", "Cape", "67" },
+			Counts = {
+				Boobs = 2,
+				Ass = 2,
+				Penis = 7,
+				Wings = 12,
+				Cape = 12,
+				["67"] = 13,
+			},
+			Points67 = {
+				Vector2.new(-1.75, 1.65),
+				Vector2.new(-0.65, 1.65),
+				Vector2.new(-1.75, 0.55),
+				Vector2.new(-1.75, -0.55),
+				Vector2.new(-0.65, -0.55),
+				Vector2.new(-1.75, -1.65),
+				Vector2.new(-0.65, -1.65),
+				Vector2.new(0.5, 1.65),
+				Vector2.new(1.6, 1.65),
+				Vector2.new(2.7, 1.65),
+				Vector2.new(2.15, 0.55),
+				Vector2.new(1.6, -0.55),
+				Vector2.new(1.05, -1.65),
+			},
+			Limit = 13,
+			GlobalSpacing = 1,
+			ShaftLength = 5,
+			ShaftSpacing = 0.9,
+			WingSpacing = 1.1,
+			CapeSpacing = 1.3,
+			Transparency = 0.5,
+			Spacing67 = 0.4,
+			Display67 = "Show to Back",
+			CapeMode = "4x3",
+			WingPhase = 0,
+			WingSpeed = 1.4,
+			Spawning = false,
+			Generation = 0,
+		},
+		EyeLaser = {
+			Keybind = Enum.KeyCode.U,
+			Amount = 6,
+			MaxDistance = 150,
+			Speed = 20,
+			Transparency = 0,
+			Models = {},
+			Parts = {},
+			Acquiring = {},
+			Spawning = false,
+			Generation = 0,
+			ResolvedToyName = "FireworkSparkler",
+		},
+	}
+
+	do
+		local function trackInvFolder(folderName)
+			local f = workspace:FindFirstChild(folderName)
+			if f and not table.find(tbl7.Inventories, f) then
+				table.insert(tbl7.Inventories, f)
+				local conn
+				conn = f:GetPropertyChangedSignal("Parent"):Connect(function()
+					if not f.Parent then
+						local idx = table.find(tbl7.Inventories, f)
+						if idx then table.remove(tbl7.Inventories, idx) end
+						conn:Disconnect()
+					end
+				end)
+			end
+		end
+
+		trackInvFolder(v17.Name)
+		for _, p in ipairs(tbl7.PlayerList) do
+			trackInvFolder(p.Name .. "SpawnedInToys")
+		end
+		for _, fName in ipairs({
+			"Balloons", "Cave", "Cubes", "Drawers", "Farm", "Food",
+			"Furniture", "Glass Boxes", "Ladders", "Large Animals",
+			"Lincoln Planks", "Music", "NOT New", "Other", "Pallets",
+			"Robloxians", "Rollers",
+		}) do
+			trackInvFolder(fName)
+		end
+		workspace.ChildAdded:Connect(function(ch)
+			if ch:IsA("Folder") then trackInvFolder(ch.Name) end
+		end)
+	end
+
+	Players.PlayerAdded:Connect(function(plr)
+		if not table.find(tbl7.PlayerList, plr) then
+			tbl7.PlayerList[#tbl7.PlayerList + 1] = plr
+		end
+	end)
+	Players.PlayerRemoving:Connect(function(plr)
+		local idx = table.find(tbl7.PlayerList, plr)
+		if idx then table.remove(tbl7.PlayerList, idx) end
+		tbl7.SelectedPlayersExp[plr] = nil
+		if tbl9.SelectedTAPlayer == plr then tbl9.SelectedTAPlayer = nil end
+	end)
+
+	local tbl12 = {}
+	local tbl13 = {
+		Shapes = {},
+		ShapeNames = {},
+		ShapeCache = {},
+		Models = {},
+		Movers = {},
+		Candidates = {},
+		Inventories = {},
+		ActiveInventories = {},
+		CharacterParts = {},
+		CharacterRoots = {},
+	}
+
+	local charCache = setmetatable({}, { __mode = "k" })
+	local velCache = setmetatable({}, { __mode = "k" })
+
+	tbl12.SetRuntimeConnection = function(name, signal, enabled, callback)
+		local conn = tbl7.RuntimeConnections[name]
+		if not enabled then
+			if conn then conn:Disconnect() end
+			tbl7.RuntimeConnections[name] = nil
+			return
+		end
+		if conn and conn.Connected then return end
+		if signal then
+			tbl7.RuntimeConnections[name] = signal:Connect(callback)
+		end
+	end
+
+	tbl12.Char = function(plr)
+		if plr == nil then plr = localPlayer end
+		if plr then
+			if charCache[plr] then
+				local c = charCache[plr].Character
+				local r = charCache[plr].RootPart
+				local h = charCache[plr].Humanoid
+				if c and c.Parent and r and r.Parent and h and h.Parent then
+					return c, r, h
+				end
+				charCache[plr] = nil
+			end
+			local character = plr.Character
+			if character then
+				local realHrp = character:FindFirstChild("realHrp") or character:FindFirstChild("HumanoidRootPart")
+				local humanoid = character:FindFirstChild("Humanoid")
+				charCache[plr] = { Character = character, RootPart = realHrp, Humanoid = humanoid }
+				return character, realHrp, humanoid
+			end
+		end
+	end
+
+	tbl12.GetTarget = function()
+		if mouse then return mouse.Target end
+	end
+
+	tbl12.GetHit = function()
+		if mouse and mouse.Hit then return mouse.Hit end
+		return currentCamera.CFrame
+	end
+
+	tbl12.ResetVelocity = function(part)
+		if not part or not part:IsA("BasePart") then return false end
+		if part.AssemblyAngularVelocity ~= Vector3.zero then
+			part.AssemblyAngularVelocity = Vector3.zero
+		end
+		if part.AssemblyLinearVelocity ~= Vector3.zero then
+			part.AssemblyLinearVelocity = Vector3.zero
+		end
+		return true
+	end
+
+	tbl12.GetMagnitude = function(a, b)
+		if not a or not b then return math.huge end
+		return (a.Position - b.Position).Magnitude
+	end
+
+	tbl12.IsPartOwner = function(part)
+		if not (part and part:IsA("BasePart")) then return false end
+		local cached = tbl7.PartOwnerCache[part]
+		if cached and cached.Parent then
+			return cached.Value == localPlayer.Name
+		end
+		local par = part.Parent
+		local head = part.Name == "HumanoidRootPart" and par and par:FindFirstChild("Head")
+		head = head and head:FindFirstChild("PartOwner")
+		if head and head.Value == localPlayer.Name then
+			tbl7.PartOwnerCache[part] = head
+			return true
+		end
+		local po = part:FindFirstChild("PartOwner")
+		if po and po.Value == localPlayer.Name then
+			tbl7.PartOwnerCache[part] = po
+			return true
+		end
+		local deepPo = par and par:FindFirstChild("PartOwner", true)
+		if deepPo then
+			tbl7.PartOwnerCache[part] = deepPo
+			return deepPo.Value == localPlayer.Name
+		end
+		return false
+	end
+
+	tbl12.GetCustomVelocity = function(part)
+		local now = os.clock()
+		local pos = part.Position
+		local data = velCache[part]
+		if not data then
+			velCache[part] = { Position = pos, Time = now, Linear = Vector3.zero }
+			return Vector3.zero
+		end
+		local dt = now - data.Time
+		if dt < 0.001 then return data.Linear end
+		local vel = (pos - data.Position) / dt
+		if dt > 0.25 or vel.Magnitude > 300 then
+			data.Linear = Vector3.zero
+		else
+			data.Linear = data.Linear:Lerp(vel, 1 - math.exp(-dt * 40))
+			if data.Linear.Magnitude < 0.05 then data.Linear = Vector3.zero end
+		end
+		data.Position = pos
+		data.Time = now
+		return data.Linear
+	end
+
+	tbl12.PredictCFrame = function(part, cf)
+		local targetCF = cf or part.CFrame
+		if not tbl8.PositionPrediction then return targetCF end
+		local ping = math.clamp(localPlayer:GetNetworkPing(), 0, 0.35)
+		return targetCF + tbl12.GetCustomVelocity(part) * ping
+	end
+
+	tbl12.Grab = function(part, customCF)
+		local _, hrp, hum = tbl12.Char()
+		if not hrp or not hum or hum.Health == 0 or not part or not part.Parent or not part:IsA("BasePart") then return end
+		local originCF = (customCF or hrp.CFrame) * CFrame.new(0, 1.593, 0)
+		local predicted = tbl12.PredictCFrame(part)
+		if not tbl8.DirectGrab then
+			predicted = CFrame.new(originCF.Position, predicted.Position)
+		end
+		tbl11.SetNetworkOwner:FireServer(part, predicted)
+	end
+
+	tbl12.RNO = function(part)
+		tbl11.DestroyGrabLine:FireServer(part)
+	end
+
+	tbl12.WhichPlot = function(plr)
+		local plots = workspace:FindFirstChild("Plots")
+		if not plots then return end
+		for _, child in pairs(plots:GetChildren()) do
+			local plotArea = child:FindFirstChild("PlotArea")
+			if plotArea then
+				for _, p in pairs(workspace:GetPartsInPart(plotArea)) do
+					if Players:GetPlayerFromCharacter(p.Parent) == plr then
+						local owned = plr:FindFirstChild("InOwnedPlot")
+						return child, owned and owned.Value
+					end
+				end
+			end
+		end
+	end
+
+	tbl12.BreakPlot = function(target)
+		if not target then return end
+		local inPlotVal = nil
+		if target:IsA("Player") then
+			inPlotVal = target:FindFirstChild("InPlot")
+			if not inPlotVal then return end
+			target = tbl12.WhichPlot(target)
+			if not target then return end
+		end
+		if tbl7.BrokenPlots[target.Name] then return true end
+		local plotArea = target:FindFirstChild("PlotArea")
+		if not plotArea then return end
+		local shuriken = tbl12.SpawnToy("NinjaShuriken")
+		if not shuriken then return end
+		local stickyPart = shuriken:WaitForChild("StickyPart", 0.4)
+		local stickyWeld = stickyPart and stickyPart:WaitForChild("StickyWeld", 0.4)
+		local farCF = target.Name == "Plot5"
+			and CFrame.new(2147483648, 2147483648, 2147483648)
+			or CFrame.new(1099511627776, 1099511627776, 1099511627776)
+
+		if not stickyWeld or not tbl12.SNO(stickyPart) then return end
+		tbl11.StickyPartEvent:FireServer(stickyPart, plotArea, farCF)
+		local t0 = tick()
+		while not (stickyWeld.Part1 == plotArea and (not inPlotVal or not inPlotVal.Value) or not stickyWeld.Parent or tick() - t0 > 0.8) do
+			task.wait()
+		end
+		if not stickyWeld.Parent or stickyWeld.Part1 ~= plotArea or (inPlotVal and inPlotVal.Value == true) then
+			tbl12.DestroyToy(shuriken)
+			return false
+		end
+		tbl7.BrokenPlots[target.Name] = shuriken
+		shuriken.Destroying:Once(function()
+			tbl7.BrokenPlots[target.Name] = nil
+		end)
+		return shuriken
+	end
+
+	tbl12.SNO = function(part, timeout, cond)
+		local char, hrp, hum = tbl12.Char()
+		local head = char and char:FindFirstChild("Head")
+		local ragdolled = hum and hum:FindFirstChild("Ragdolled")
+		if not (head and ragdolled and hrp and hum and hum.Health > 0) then return false end
+		if not part or not part:IsA("BasePart") or not part.Parent or tbl12.GetMagnitude(part, workspace.SpawnLocation) > 10000000 then
+			return false
+		end
+		if tbl12.IsPartOwner(part) then return true end
+		if tbl7.States.Owning or (cond and not cond()) then return false end
+
+		local farAway = (hrp.Position - part.Position).Magnitude >= 31
+		local savedHrpCF = CFrame.new()
+		local savedHeadCF = CFrame.new()
+		local spoofCF = CFrame.new()
+		local hbConn = nil
+
+		local isCharRoot = (part.Name == "HumanoidRootPart" or part.Name == "Torso")
+		local plotShuriken = nil
+		if isCharRoot and part.Parent then
+			local targetPlr = Players:FindFirstChild(part.Parent.Name)
+			if targetPlr then
+				local _, _, tHum = tbl12.Char(targetPlr)
+				if not tHum or tHum.Health == 0 then return false end
+				local pInPlot = targetPlr:FindFirstChild("InPlot")
+				if pInPlot and pInPlot.Value == true then
+					plotShuriken = tbl12.BreakPlot(targetPlr)
+					if not plotShuriken then return false end
+				end
+			end
+		end
+
+		tbl7.States.Owning = true
+
+		local function startSpoof()
+			savedHrpCF = hrp.CFrame
+			savedHeadCF = head.CFrame
+			spoofCF = hrp.CFrame
+			RunService:BindToRenderStep("RSCClient", Enum.RenderPriority.Camera.Value - 1, function()
+				hrp.CFrame = savedHrpCF
+				head.CFrame = savedHeadCF
+			end)
+			hbConn = RunService.Heartbeat:Connect(function()
+				savedHrpCF = hrp.CFrame
+				savedHeadCF = head.CFrame
+				hrp.CFrame = spoofCF
+				head.CFrame = spoofCF
+			end)
+		end
+
+		local function stopSpoof()
+			RunService:UnbindFromRenderStep("RSCClient")
+			if hbConn then hbConn:Disconnect(); hbConn = nil end
+			head.CFrame = savedHeadCF
+			hrp.CFrame = savedHrpCF
+		end
+
+		local ok, err = pcall(function()
+			if farAway then startSpoof() end
+			timeout = timeout or 0.65
+			local t0 = tick()
+			while part.Parent and not tbl12.IsPartOwner(part) and hum.Health ~= 0 and hrp.Parent and (not cond or cond()) and tick() - t0 < timeout do
+				if farAway then
+					spoofCF = tbl12.PredictCFrame(part) - Vector3.new(0, 22, 0)
+				end
+				RunService.Heartbeat:Wait()
+				tbl12.Grab(part, farAway and spoofCF or nil)
+			end
+		end)
+
+		if farAway then pcall(stopSpoof) end
+		if plotShuriken then task.delay(1, tbl12.DestroyToy, plotShuriken) end
+		tbl7.States.Owning = false
+		if not ok then warn(err) return false end
+		return tbl12.IsPartOwner(part)
+	end
+
+	tbl12.SpawnToy = function(toyName, customCF, priority, reserveAura)
+		if type(toyName) ~= "string" or toyName == "" or tbl7.FailedToys[toyName] then return end
+		local prio = tonumber(priority) or 0
+
+		if tbl7.States.Spawning or #tbl7.SpawnQueue > 0 then
+			if prio <= 0 then return end
+			tbl7.SpawnOrder = tbl7.SpawnOrder + 1
+			local item = { Priority = prio, Order = tbl7.SpawnOrder }
+			table.insert(tbl7.SpawnQueue, item)
+			table.sort(tbl7.SpawnQueue, function(a, b)
+				if a.Priority == b.Priority then return a.Order < b.Order end
+				return a.Priority > b.Priority
+			end)
+			while tbl7.States.Spawning or tbl7.SpawnQueue[1] ~= item do
+				task.wait()
+			end
+			table.remove(tbl7.SpawnQueue, table.find(tbl7.SpawnQueue, item))
+		end
+
+		local _, hrp = tbl12.Char()
+		if not hrp then return end
+		local inForeignPlot = inPlot.Value and not inOwnedPlot.Value
+		if inForeignPlot and tbl7.States.Owning then return end
+		tbl7.States.Spawning = true
+		if inForeignPlot then tbl7.States.Owning = true end
+
+		if localPlayer.CanSpawnToy.Value == false then
+			repeat task.wait() until localPlayer.CanSpawnToy.Value
+		end
+
+		local baseCF = inForeignPlot and CFrame.new(0, 25, 0) or (hrp.CFrame + Vector3.new(0, 15, 0))
+		local spawnCF = CFrame.new((customCF or baseCF).Position) + Vector3.new(0, 0, 20)
+		local rot = workspace:FindFirstChild("RotateOrientPart") and workspace.RotateOrientPart.Rotation or Vector3.zero
+		local spawnedModel = nil
+		local addedConn = nil
+
+		addedConn = v17.ChildAdded:Connect(function(child)
+			if child.Name == toyName or (toyName:lower():find("sparkler") and child.Name:lower():find("sparkler")) then
+				spawnedModel = child
+				if reserveAura then tbl7.ToyAuraReserved[child] = true end
+				if addedConn then addedConn:Disconnect() end
+			end
+		end)
+
+		local savedHrpCF = hrp.CFrame
+		local plotBypassCF = CFrame.new(0, 10, 0)
+		local hbConn = nil
+
+		if inForeignPlot then
+			RunService:BindToRenderStep("STClient", Enum.RenderPriority.Camera.Value - 1, function()
+				hrp.CFrame = savedHrpCF
+			end)
+			hbConn = RunService.Heartbeat:Connect(function()
+				savedHrpCF = hrp.CFrame
+				hrp.CFrame = plotBypassCF
+			end)
+		end
+
+		local t0 = tick()
+		task.spawn(function()
+			tbl11.SpawnToy:InvokeServer(toyName, spawnCF, rot)
+		end)
+
+		while not (spawnedModel or tick() - t0 > 1.3) do
+			RunService.Heartbeat:Wait()
+			if inForeignPlot then
+				task.spawn(function()
+					tbl11.SpawnToy:InvokeServer(toyName, spawnCF, rot)
+				end)
+			end
+		end
+
+		if inForeignPlot then
+			RunService:UnbindFromRenderStep("STClient")
+			if hbConn then hbConn:Disconnect() end
+			if hrp then hrp.CFrame = savedHrpCF end
+		end
+		if addedConn then addedConn:Disconnect() end
+
+		if not spawnedModel then
+			tbl7.FailedToys[toyName] = true
+			task.delay(2, function() tbl7.FailedToys[toyName] = nil end)
+		end
+
+		tbl7.States.Spawning = false
+		if inForeignPlot then tbl7.States.Owning = false end
+		return spawnedModel
+	end
+
+	tbl12.DestroyToy = function(model)
+		if model and model:IsA("Model") then
+			tbl11.DestroyToy:FireServer(model)
+		end
+	end
+
+	tbl12.FindNicePart = function(model)
+		if not model or not model:IsA("Model") then return end
+		local cached = tbl7.GrabbableParts[model]
+		if cached and cached:IsDescendantOf(model) and cached.CanQuery and not cached.Anchored then
+			return cached
+		end
+		tbl7.GrabbableParts[model] = nil
+		local fallback = nil
+		for _, part in ipairs(model:GetDescendants()) do
+			if part:IsA("BasePart") and part.CanQuery and not part.Anchored and part.Name ~= "Button" then
+				fallback = fallback or part
+				if (part.AssemblyRootPart or part) == part then
+					tbl7.GrabbableParts[model] = part
+					return part
+				end
+			end
+		end
+		tbl7.GrabbableParts[model] = fallback
+		return fallback
+	end
+
+	tbl12.BreakHoldable = function(toy, timeout, disableRigid)
+		local char, _, hum = tbl12.Char()
+		local leftGrip = char and char:FindFirstChild("Left Arm") and char["Left Arm"]:FindFirstChild("LeftGripAttachment")
+		local holdPart = toy and toy:WaitForChild("HoldPart", 0.5)
+		local holdRF = holdPart and holdPart:WaitForChild("HoldItemRemoteFunction", 0.45)
+		local dropRF = holdRF and holdPart:WaitForChild("DropItemRemoteFunction", 0.45)
+		local rigid = dropRF and holdPart:WaitForChild("RigidConstraint", 0.45)
+		if not (char and hum and leftGrip and holdRF and dropRF and rigid) then return false end
+		if disableRigid then rigid.Enabled = false end
+
+		local t0 = tick()
+		while char.Parent and toy.Parent and leftGrip.Parent and rigid.Parent and rigid.Attachment1 == nil and tick() - t0 < (timeout or 0.65) do
+			task.spawn(function() pcall(holdRF.InvokeServer, holdRF, toy, char) end)
+			task.wait(0.05)
+		end
+		if rigid.Attachment1 == nil then return false end
+
+		local t1 = tick()
+		while rigid.Parent and rigid.Attachment1 ~= nil and tick() - t1 <= 0.65 do
+			task.spawn(function() pcall(dropRF.InvokeServer, dropRF, toy) end)
+			task.wait(0.05)
+		end
+		if dropRF and dropRF.Parent then dropRF:Destroy() end
+
+		for _, tr in ipairs(hum:GetPlayingAnimationTracks()) do
+			local id = tr.Animation and tr.Animation.AnimationId:match("%d+")
+			if not (id and tbl7.AnimationWhitelist[id]) then tr:Stop() end
+		end
+		return rigid.Parent and rigid.Attachment1 == nil
+	end
+
+	local function releaseIfHeldByLocalPlayer(model)
+		if not model or not model:IsA("Model") then return end
+		local holdPart = model:FindFirstChild("HoldPart")
+		local rigid = holdPart and holdPart:FindFirstChild("RigidConstraint")
+		if rigid and rigid.Attachment1 then
+			local char = tbl12.Char()
+			if char and rigid.Attachment1:IsDescendantOf(char) then
+				local dropRF = holdPart:FindFirstChild("DropItemRemoteFunction")
+				if dropRF then
+					task.spawn(function()
+						pcall(dropRF.InvokeServer, dropRF, model)
+					end)
+					local t0 = tick()
+					while rigid.Parent and rigid.Attachment1 and tick() - t0 < 0.35 do
+						RunService.Heartbeat:Wait()
+					end
+				end
+			end
+		end
+	end
+
+	do
+		local toysAuraSettings = tbl7.ToysAuraSettings
+		local movePhase = 0
+		local bobPhase = 0
+
+		tbl13.IsToyAllowed = function(model)
+			if not model then return false end
+			if not toysAuraSettings.FilterToysEnabled then return true end
+			local mName = model.Name
+			if toysAuraSettings.AllowedToys[mName] then return true end
+			if mName:lower():find("sparkler") and (toysAuraSettings.AllowedToys["Sparkler"] or toysAuraSettings.AllowedToys["FireworkSparkler"]) then
+				return true
+			end
+			return false
+		end
+
+		tbl13.ClearCharacterRoots = function()
+			tbl12.SetRuntimeConnection("ToyAuraCharacterAdded", nil, false)
+			tbl12.SetRuntimeConnection("ToyAuraCharacterRemoved", nil, false)
+			tbl13.Character = nil
+			table.clear(tbl13.CharacterParts)
+			table.clear(tbl13.CharacterRoots)
+		end
+
+		tbl13.UpdateCharacterRoots = function()
+			local character = localPlayer.Character
+			if character ~= tbl13.Character then
+				tbl13.ClearCharacterRoots()
+				tbl13.Character = character
+				if character then
+					tbl12.SetRuntimeConnection("ToyAuraCharacterAdded", character.DescendantAdded, true, function(arg)
+						if arg:IsA("BasePart") then tbl13.CharacterParts[arg] = true end
+					end)
+					tbl12.SetRuntimeConnection("ToyAuraCharacterRemoved", character.DescendantRemoving, true, function(arg)
+						tbl13.CharacterParts[arg] = nil
+					end)
+					for _, p in ipairs(character:GetDescendants()) do
+						if p:IsA("BasePart") then tbl13.CharacterParts[p] = true end
+					end
+				end
+			end
+			table.clear(tbl13.CharacterRoots)
+			for k in pairs(tbl13.CharacterParts) do
+				tbl13.CharacterRoots[k.AssemblyRootPart or k] = true
+			end
+		end
+
+		tbl13.AddCandidate = function(arg, inv)
+			if not arg:IsA("Model") then
+				arg = arg:FindFirstAncestorOfClass("Model")
+			end
+			while arg and arg.Parent and arg.Parent:IsA("Model") do
+				arg = arg.Parent
+			end
+			if arg and (arg == inv or arg:IsDescendantOf(inv)) then
+				tbl13.Candidates[arg] = inv
+			end
+		end
+
+		tbl13.UntrackInventory = function(inv)
+			local conns = tbl13.Inventories[inv]
+			if not conns then return end
+			tbl13.Inventories[inv] = nil
+			for _, c in ipairs(conns) do c:Disconnect() end
+			for k, candidateInv in pairs(tbl13.Candidates) do
+				if candidateInv == inv then
+					tbl13.Candidates[k] = nil
+					tbl7.ToyAuraRoots[k] = nil
+				end
+			end
+		end
+
+		tbl13.TrackInventory = function(inv)
+			if not (inv and inv.Parent) or tbl13.Inventories[inv] then return end
+			local conns = {
+				inv.DescendantAdded:Connect(function(d) tbl13.AddCandidate(d, inv) end),
+				inv.DescendantRemoving:Connect(function(d)
+					if tbl13.Candidates[d] == inv then
+						tbl13.Candidates[d] = nil
+						tbl7.ToyAuraRoots[d] = nil
+					end
+				end),
+			}
+			tbl13.Inventories[inv] = conns
+			task.spawn(function()
+				for i, d in ipairs(inv:GetDescendants()) do
+					if tbl13.Inventories[inv] ~= conns then return end
+					tbl13.AddCandidate(d, inv)
+					if i % 100 == 0 then task.wait() end
+				end
+			end)
+		end
+
+		tbl13.RefreshInventories = function(ownInv)
+			table.clear(tbl13.ActiveInventories)
+			for _, inv in ipairs(tbl7.Inventories) do
+				if inv and inv.Parent then
+					tbl13.ActiveInventories[inv] = true
+					tbl13.TrackInventory(inv)
+				end
+			end
+			if ownInv and ownInv.Parent then
+				tbl13.ActiveInventories[ownInv] = true
+				tbl13.TrackInventory(ownInv)
+			end
+			for k in pairs(tbl13.Inventories) do
+				if not tbl13.ActiveInventories[k] then
+					tbl13.UntrackInventory(k)
+				end
+			end
+		end
+
+		tbl13.GetRoot = function(model)
+			if not model or not model.Parent or tbl7.ToyAuraReserved[model] or model.Name:find("RSC", 1, true) then
+				return
+			end
+			local cached = tbl7.ToyAuraRoots[model]
+			local valid = cached and cached.Parent and (cached == model or cached:IsDescendantOf(model))
+			local root = valid and cached or nil
+			if not root then
+				if model:FindFirstChildOfClass("Humanoid") then return end
+				if model:IsA("BasePart") then
+					root = model
+				elseif model:IsA("Model") then
+					root = tbl12.FindNicePart(model) or model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+				end
+			end
+			if not root or not root.Parent then return end
+			local assemblyRoot = root.AssemblyRootPart or root
+			if tbl13.CharacterRoots[assemblyRoot] or (assemblyRoot ~= model and not assemblyRoot:IsDescendantOf(model)) then
+				return
+			end
+			if cached and cached ~= assemblyRoot then
+				tbl13.ClearMovers(model)
+			end
+			tbl7.ToyAuraRoots[model] = assemblyRoot
+			return assemblyRoot
+		end
+
+		tbl13.SetCollisions = function(model, canCollide)
+			local mover = tbl13.Movers[model]
+			if not mover then return end
+			if canCollide == nil then
+				for part, orig in pairs(mover.Parts) do
+					if part.Parent then part.CanCollide = orig end
+				end
+				table.clear(mover.Parts)
+				return
+			end
+			for _, p in ipairs(model:GetDescendants()) do
+				if p:IsA("BasePart") then
+					if mover.Parts[p] == nil then mover.Parts[p] = p.CanCollide end
+					p.CanCollide = canCollide
+				end
+			end
+		end
+
+		tbl13.ClearMovers = function(model)
+			if not model then
+				for k in pairs(tbl13.Movers) do tbl13.ClearMovers(k) end
+				return
+			end
+			local mover = tbl13.Movers[model]
+			if not mover then return end
+			tbl13.SetCollisions(model, nil)
+			mover.Position:Destroy()
+			mover.Orientation:Destroy()
+			mover.Attachment:Destroy()
+			tbl13.Movers[model] = nil
+		end
+
+		tbl13.EnsureMovers = function(model, root)
+			root = root or tbl13.GetRoot(model)
+			if not root or root.Anchored then return end
+			local mover = tbl13.Movers[model]
+			if mover and (mover.Root ~= root or mover.Attachment.Parent ~= root or mover.Position.Parent ~= root or mover.Orientation.Parent ~= root) then
+				tbl13.ClearMovers(model)
+				mover = nil
+			end
+			if not mover then
+				local att = root:FindFirstChild("AuraAttachment") or Instance.new("Attachment")
+				att.Name = "AuraAttachment"
+				att.Parent = root
+				local ap = root:FindFirstChild("AuraAlignPos") or Instance.new("AlignPosition")
+				ap.Name = "AuraAlignPos"
+				ap.Attachment0 = att
+				ap.Mode = Enum.PositionAlignmentMode.OneAttachment
+				ap.ApplyAtCenterOfMass = true
+				ap.MaxForce = math.huge
+				ap.MaxVelocity = math.huge
+				ap.RigidityEnabled = false
+				ap.Parent = root
+				local ao = root:FindFirstChild("AuraAlignOri") or Instance.new("AlignOrientation")
+				ao.Name = "AuraAlignOri"
+				ao.Attachment0 = att
+				ao.Mode = Enum.OrientationAlignmentMode.OneAttachment
+				ao.MaxTorque = math.huge
+				ao.MaxAngularVelocity = math.huge
+				ao.RigidityEnabled = false
+				ao.Parent = root
+				mover = { Root = root, Attachment = att, Position = ap, Orientation = ao, Parts = {} }
+				tbl13.Movers[model] = mover
+			end
+			local resp = toysAuraSettings.Responsiveness or 55
+			if mover.Responsiveness ~= resp then
+				mover.Position.Responsiveness = resp
+				mover.Orientation.Responsiveness = math.max(resp - 10, 10)
+				mover.Responsiveness = resp
+			end
+			if mover.Collisions ~= toysAuraSettings.Collisions then
+				tbl13.SetCollisions(model, toysAuraSettings.Collisions)
+				mover.Collisions = toysAuraSettings.Collisions
+			end
+			return mover.Position, mover.Orientation, root, mover
+		end
+
+		tbl13.UpdatePhysics = function(model, root, targetCF, faceCenter, centerPos)
+			local ap, ao, _, mover = tbl13.EnsureMovers(model, root)
+			if not ap then return end
+			local pos = targetCF.Position
+			if mover.TargetPosition ~= pos then
+				ap.Position = pos
+				mover.TargetPosition = pos
+			end
+			local dir = centerPos and (centerPos - pos)
+			local oriCF = (faceCenter and dir and dir:Dot(dir) > 0.0025)
+				and (CFrame.lookAt(pos, centerPos)).Rotation
+				or targetCF.Rotation
+			if mover.TargetOrientation ~= oriCF then
+				ao.CFrame = oriCF
+				mover.TargetOrientation = oriCF
+			end
+		end
+
+		tbl13.GetPath = function(pts, count, closed)
+			local out = {}
+			local segLengths = {}
+			local segCount = closed and #pts or (#pts - 1)
+			local totalLen = 0
+			for i = 1, segCount do
+				local len = (pts[i % #pts + 1] - pts[i]).Magnitude
+				segLengths[i] = len
+				totalLen = totalLen + len
+			end
+			if totalLen == 0 then
+				return table.create(count, pts[1] or Vector3.zero)
+			end
+			for i = 1, count do
+				local denom = closed and count or math.max(count - 1, 1)
+				local dist = ((i - 1) / denom) * totalLen
+				local segIdx = 1
+				while segIdx < segCount and dist > segLengths[segIdx] do
+					dist = dist - segLengths[segIdx]
+					segIdx = segIdx + 1
+				end
+				local alpha = segLengths[segIdx] > 0 and math.clamp(dist / segLengths[segIdx], 0, 1) or 0
+				out[i] = pts[segIdx]:Lerp(pts[segIdx % #pts + 1], alpha)
+			end
+			return out
+		end
+
+		tbl13.AddShape = function(name, generator, closed)
+			if not tbl13.Shapes[name] then
+				table.insert(tbl13.ShapeNames, name)
+			end
+			tbl13.Shapes[name] = { Generate = generator, Closed = closed }
+			table.clear(tbl13.ShapeCache)
+		end
+
+		tbl13.GetShape = function(count)
+			local shapeObj = tbl13.Shapes[toysAuraSettings.Shape] or tbl13.Shapes.Circle
+			local rows = math.clamp(math.floor(toysAuraSettings.Rows or 1), 1, math.max(count, 1))
+			local rotations = math.max(toysAuraSettings.Rotations or 1, 0)
+			local cache = tbl13.ShapeCache
+			if cache.Shape == shapeObj and cache.Count == count and cache.Rows == rows and cache.Rotations == rotations then
+				return cache.Points
+			end
+			local points
+			if type(shapeObj.Generate) == "table" then
+				points = tbl13.GetPath(shapeObj.Generate, count, shapeObj.Closed)
+			else
+				local sampleCount = (shapeObj.Closed ~= nil) and math.max(192, count * 4) or count
+				local raw = table.create(sampleCount)
+				for i = 1, sampleCount do
+					raw[i] = shapeObj.Generate(i, sampleCount, rows, rotations)
+				end
+				points = (shapeObj.Closed == nil) and raw or tbl13.GetPath(raw, count, shapeObj.Closed)
+			end
+			cache.Shape = shapeObj
+			cache.Count = count
+			cache.Rows = rows
+			cache.Rotations = rotations
+			cache.Points = points
+			return points
+		end
+
+		tbl13.GetRow = function(idx, total, rows)
+			local basePerRow = math.floor(total / rows)
+			local extra = total % rows
+			local split = (basePerRow + 1) * extra
+			if idx <= split then
+				return math.floor((idx - 1) / (basePerRow + 1)), (idx - 1) % (basePerRow + 1), basePerRow + 1
+			end
+			local rem = idx - split - 1
+			return extra + math.floor(rem / basePerRow), rem % basePerRow, basePerRow
+		end
+
+		tbl13.GetOffset = function(pt)
+			local r = (toysAuraSettings.Radius or 20) * (toysAuraSettings.Spacing or 1)
+			local h = toysAuraSettings.Height or toysAuraSettings.Radius or 20
+			return Vector3.new(pt.X * r, pt.Y * h, pt.Z * r)
+		end
+
+		tbl13.GetCenter = function(hrp)
+			local center = toysAuraSettings.Center or CFrame.new(0, 50, 0)
+			if toysAuraSettings.PosType == "You" and hrp then
+				center = hrp.CFrame * toysAuraSettings.Offset
+			elseif toysAuraSettings.PosType == "Mouse" then
+				local hitCF = tbl12.GetHit()
+				center = CFrame.new(hitCF.Position) * toysAuraSettings.Offset
+			elseif (toysAuraSettings.PosType == "Players" or toysAuraSettings.PosType == "Player") and tbl9.SelectedTAPlayer then
+				local _, tHrp = tbl12.Char(tbl9.SelectedTAPlayer)
+				if tHrp then
+					center = tHrp.CFrame * toysAuraSettings.Offset
+				end
+			elseif (toysAuraSettings.PosType == "Custom Pos" or toysAuraSettings.PosType == "Custom") and toysAuraSettings.CustomPos then
+				center = toysAuraSettings.CustomPos * toysAuraSettings.Offset
+			end
+			local rot = toysAuraSettings.Rotation
+			return center * CFrame.Angles(math.rad(rot.X), math.rad(rot.Y), math.rad(rot.Z))
+		end
+
+		tbl13.AddModel = function(model, acquireOwner, timeout, root)
+			if not model or not model.Parent or not model:IsA("Model") or tbl13.Models[model] then return end
+			if tbl7.ToyAuraReserved[model] then return end
+			if not tbl13.IsToyAllowed(model) then return end
+			if toysAuraSettings.OwnInventoryOnly and not model:IsDescendantOf(v17) then return end
+			if toysAuraSettings.LimitEnabled and #toysAuraSettings.Models >= toysAuraSettings.Limit then return end
+
+			releaseIfHeldByLocalPlayer(model)
+
+			if not root then
+				tbl13.UpdateCharacterRoots()
+				root = tbl13.GetRoot(model)
+			end
+			if not root then return end
+			if acquireOwner and not tbl12.IsPartOwner(root) then
+				if not tbl12.SNO(root, timeout or 0.35) then return end
+				tbl13.UpdateCharacterRoots()
+				if tbl13.GetRoot(model) ~= root then return end
+			end
+			if not model.Parent or tbl13.Models[model] or tbl7.ToyAuraReserved[model] or not tbl13.IsToyAllowed(model) then return end
+			if toysAuraSettings.LimitEnabled and #toysAuraSettings.Models >= toysAuraSettings.Limit then return end
+			table.insert(toysAuraSettings.Models, model)
+			tbl13.Models[model] = true
+			return true
+		end
+
+		tbl13.RemoveModel = function(model, releaseNet, idx)
+			local posIdx = idx or table.find(toysAuraSettings.Models, model)
+			if posIdx then table.remove(toysAuraSettings.Models, posIdx) end
+			tbl13.Models[model] = nil
+			tbl13.ClearMovers(model)
+			if releaseNet then
+				local root = tbl13.GetRoot(model)
+				if root then
+					task.delay(0.1, function()
+						if root.Parent and not tbl13.Models[model] then
+							tbl12.RNO(root)
+						end
+					end)
+				end
+			end
+			tbl7.ToyAuraRoots[model] = nil
+		end
+
+		tbl13.FilterExistingModels = function()
+			if not toysAuraSettings.FilterToysEnabled then return end
+			for i = #toysAuraSettings.Models, 1, -1 do
+				local m = toysAuraSettings.Models[i]
+				if not tbl13.IsToyAllowed(m) then
+					tbl13.RemoveModel(m, true, i)
+				end
+			end
+		end
+
+		tbl13.TrimModels = function()
+			while toysAuraSettings.LimitEnabled and #toysAuraSettings.Models > toysAuraSettings.Limit do
+				tbl13.RemoveModel(toysAuraSettings.Models[#toysAuraSettings.Models], true)
+			end
+		end
+
+		tbl13.ClearModels = function(releaseNet)
+			for i = #toysAuraSettings.Models, 1, -1 do
+				tbl13.RemoveModel(toysAuraSettings.Models[i], releaseNet, i)
+			end
+			tbl13.ClearMovers()
+		end
+
+		tbl13.AddShape("Circle", function(i, n)
+			local a = (i - 1) / n * math.pi * 2
+			return Vector3.new(math.cos(a), 0, math.sin(a))
+		end)
+
+		tbl13.AddShape("Line", function(i, n)
+			local t = (n == 1) and 0.5 or ((i - 1) / (n - 1))
+			return Vector3.new(-1 + 2 * t, 0, 0)
+		end)
+
+		for _, poly in ipairs({
+			{ "Triangle", 3 },
+			{ "Square", 4 },
+			{ "Pentagon", 5 },
+			{ "Hexagon", 6 },
+			{ "Octagon", 8 },
+		}) do
+			local pts = {}
+			for i = 1, poly[2] do
+				local a = (i - 1) / poly[2] * math.pi * 2 - math.pi / 2
+				pts[i] = Vector3.new(math.cos(a), 0, math.sin(a))
+			end
+			tbl13.AddShape(poly[1], pts, true)
+		end
+
+		tbl13.AddShape("Diamond", {
+			Vector3.new(0, 0, -1),
+			Vector3.new(1, 0, 0),
+			Vector3.new(0, 0, 1),
+			Vector3.new(-1, 0, 0),
+		}, true)
+
+		do
+			local starPts = {}
+			for i = 1, 10 do
+				local r = (i % 2 == 1) and 1 or 0.42
+				local a = (i - 1) / 10 * math.pi * 2 - math.pi / 2
+				starPts[i] = Vector3.new(math.cos(a) * r, 0, math.sin(a) * r)
+			end
+			tbl13.AddShape("Star", starPts, true)
+		end
+
+		tbl13.AddShape("Heart", function(i, n)
+			local a = (i - 1) / n * math.pi * 2
+			return Vector3.new(
+				16 * math.sin(a) ^ 3 / 17,
+				0,
+				-(13 * math.cos(a) - 5 * math.cos(2 * a) - 2 * math.cos(3 * a) - math.cos(4 * a)) / 17
+			)
+		end, true)
+
+		tbl13.AddShape("Penis", function(i, n)
+			local t = (i - 1) / math.max(n - 1, 1)
+			if t < 0.22 then
+				local a = t / 0.22 * math.pi * 2
+				return Vector3.new(-0.38 + math.cos(a) * 0.34, -0.86 + math.sin(a) * 0.18, math.sin(a) * 0.28)
+			end
+			if t < 0.44 then
+				local a = (t - 0.22) / 0.22 * math.pi * 2
+				return Vector3.new(0.38 + math.cos(a) * 0.34, -0.86 + math.sin(a) * 0.18, math.sin(a) * 0.28)
+			end
+			if t < 0.8 then
+				local s = (t - 0.44) / 0.36
+				local a = s * math.pi * 2 * 3
+				local r = 0.34 - s * 0.07 + math.sin(s * math.pi) * 0.04
+				return Vector3.new(math.cos(a) * r, -0.48 + s * 1.28, math.sin(a) * r)
+			end
+			local s = (t - 0.8) / 0.2
+			local a = s * math.pi * 2 * 2
+			local r = (1 - s * 0.85) * 0.42
+			return Vector3.new(math.cos(a) * r, 0.8 + s * 0.25, math.sin(a) * r)
+		end)
+
+		tbl13.AddShape("Infinity", function(i, n)
+			local a = (i - 1) / n * math.pi * 2
+			local denom = 1 + math.sin(a) ^ 2
+			return Vector3.new(math.cos(a) / denom, math.sin(2 * a) * 0.15, (math.sin(a) * math.cos(a)) / denom)
+		end, true)
+
+		tbl13.AddShape("Rings", function(i, n, rows)
+			local ringCount = math.max(rows, 2)
+			local rIdx, cIdx, cols = tbl13.GetRow(i, n, ringCount)
+			local a = cIdx / math.max(cols, 1) * math.pi * 2
+			local tilt = (rIdx / ringCount) * math.pi
+			local x = math.cos(a)
+			local z = math.sin(a)
+			return Vector3.new(x, z * math.sin(tilt), z * math.cos(tilt))
+		end)
+
+		tbl13.AddShape("Double Helix", function(i, n, _, turns)
+			local strand = (i % 2 == 0) and math.pi or 0
+			local pairCount = math.max(math.floor((n - 1) / 2), 1)
+			local t = (n <= 2) and 0.5 or (math.floor((i - 1) / 2) / pairCount)
+			local a = t * math.max(turns, 1) * math.pi * 2 + strand
+			return Vector3.new(math.cos(a), -0.5 + t, math.sin(a))
+		end)
+
+		tbl13.AddShape("Helix", function(i, n, _, turns)
+			local t = (n == 1) and 0.5 or ((i - 1) / (n - 1))
+			local a = t * math.max(turns, 0.5) * math.pi * 2
+			return Vector3.new(math.cos(a), -0.5 + t, math.sin(a))
+		end)
+
+		tbl13.AddShape("Spiral", function(i, n, _, turns)
+			local t = (n == 1) and 0.5 or ((i - 1) / (n - 1))
+			local a = t * math.max(turns, 0.5) * math.pi * 2
+			local r = 0.15 + 0.85 * t
+			return Vector3.new(math.cos(a) * r, 0, math.sin(a) * r)
+		end)
+
+		tbl13.AddShape("Sphere", function(i, n)
+			local phi = math.acos(1 - 2 * ((i - 0.5) / n))
+			local theta = math.pi * (1 + 5 ^ 0.5) * (i - 1)
+			return Vector3.new(math.sin(phi) * math.cos(theta), math.cos(phi), math.sin(phi) * math.sin(theta))
+		end)
+
+		tbl13.AddShape("Cylinder", function(i, n, rows)
+			local rIdx, cIdx, cols = tbl13.GetRow(i, n, rows)
+			local a = cIdx / math.max(cols, 1) * math.pi * 2
+			local y = (rows == 1) and 0 or (-0.5 + rIdx / (rows - 1))
+			return Vector3.new(math.cos(a), y, math.sin(a))
+		end)
+
+		tbl13.AddShape("Torus", function(i, n, rows, turns)
+			local rIdx, cIdx, cols = tbl13.GetRow(i, n, math.max(rows, 3))
+			local u = (cIdx / math.max(cols, 1)) * math.pi * 2
+			local v = (rIdx / math.max(rows, 3)) * math.pi * 2 + u * math.max(turns, 1)
+			local majorR = 0.7
+			local minorR = 0.3
+			local r = majorR + minorR * math.cos(v)
+			return Vector3.new(r * math.cos(u), minorR * math.sin(v), r * math.sin(u))
+		end)
+
+		tbl13.AddShape("Cone", function(i, n, _, turns)
+			local t = (n == 1) and 0.5 or ((i - 1) / (n - 1))
+			local a = t * math.max(turns, 1) * math.pi * 2
+			local r = 1 - t
+			return Vector3.new(math.cos(a) * r, -0.5 + t, math.sin(a) * r)
+		end)
+
+		tbl13.AddShape("Tornado", function(i, n, _, turns)
+			local t = (n == 1) and 0.5 or ((i - 1) / (n - 1))
+			local a = t * math.max(turns, 0.5) * math.pi * 2
+			local r = 0.2 + 0.8 * t
+			return Vector3.new(math.cos(a) * r, -0.5 + t, math.sin(a) * r)
+		end)
+
+		tbl13.AddShape("Cube", {
+			Vector3.new(-1, -1, -1), Vector3.new(1, -1, -1), Vector3.new(1, -1, 1), Vector3.new(-1, -1, 1),
+			Vector3.new(-1, -1, -1), Vector3.new(-1, 1, -1), Vector3.new(1, 1, -1), Vector3.new(1, -1, -1),
+			Vector3.new(1, 1, -1), Vector3.new(1, 1, 1), Vector3.new(1, -1, 1), Vector3.new(1, 1, 1),
+			Vector3.new(-1, 1, 1), Vector3.new(-1, -1, 1), Vector3.new(-1, 1, 1), Vector3.new(-1, 1, -1),
+		}, false)
+
+		tbl13.AddShape("Pyramid", {
+			Vector3.new(-1, -0.5, -1), Vector3.new(1, -0.5, -1),
+			Vector3.new(1, -0.5, 1), Vector3.new(-1, -0.5, 1),
+			Vector3.new(-1, -0.5, -1), Vector3.new(0, 0.75, 0),
+			Vector3.new(1, -0.5, -1), Vector3.new(0, 0.75, 0),
+			Vector3.new(1, -0.5, 1), Vector3.new(0, 0.75, 0),
+			Vector3.new(-1, -0.5, 1),
+		}, false)
+
+		tbl13.AddShape("Grid", function(i, n, rows)
+			local rIdx, cIdx, cols = tbl13.GetRow(i, n, rows)
+			local x = (cols <= 1) and 0 or (-1 + 2 * (cIdx / (cols - 1)))
+			local z = (rows <= 1) and 0 or (-1 + 2 * (rIdx / (rows - 1)))
+			return Vector3.new(x, 0, z)
+		end)
+
+		tbl13.AddShape("Wave", function(i, n, rows, turns)
+			local rIdx, cIdx, cols = tbl13.GetRow(i, n, rows)
+			local x = (cols <= 1) and 0 or (-1 + 2 * (cIdx / (cols - 1)))
+			local z = (rows <= 1) and 0 or (-1 + 2 * (rIdx / (rows - 1)))
+			local y = math.sin((x + 1) * math.max(turns, 0.5) * math.pi) * 0.5
+			return Vector3.new(x, y, z)
+		end)
+
+		tbl13.AddShape("Cross", {
+			Vector3.new(-0.33, 0, -1), Vector3.new(0.33, 0, -1),
+			Vector3.new(0.33, 0, -0.33), Vector3.new(1, 0, -0.33),
+			Vector3.new(1, 0, 0.33), Vector3.new(0.33, 0, 0.33),
+			Vector3.new(0.33, 0, 1), Vector3.new(-0.33, 0, 1),
+			Vector3.new(-0.33, 0, 0.33), Vector3.new(-1, 0, 0.33),
+			Vector3.new(-1, 0, -0.33), Vector3.new(-0.33, 0, -0.33),
+		}, true)
+
+		tbl13.AddShape("Crown", function(i, n, _, turns)
+			local a = (i - 1) / n * math.pi * 2
+			local peaks = math.max(math.floor(turns), 3)
+			local y = math.abs(math.sin(a * peaks * 0.5)) * 0.6
+			return Vector3.new(math.cos(a), y, math.sin(a))
+		end, true)
+
+		tbl13.AddShape("Butterfly", function(i, n)
+			local t = (i - 1) / n * math.pi * 2
+			local r = (math.exp(math.cos(t)) - 2 * math.cos(4 * t) - math.sin(t / 12) ^ 5) * 0.32
+			return Vector3.new(math.sin(t) * r, math.abs(math.sin(t)) * 0.25, math.cos(t) * r)
+		end, true)
+
+		local autoRotSpin = 0
+		tbl12.UpdateToysAura = function(dt)
+			if not toysAuraSettings.Enabled then return end
+			tbl13.UpdateCharacterRoots()
+
+			if toysAuraSettings.AutoRotate then
+				autoRotSpin = (autoRotSpin + dt * toysAuraSettings.RotationSpeed * 45) % 360
+			else
+				autoRotSpin = 0
+			end
+			if toysAuraSettings.AutoMove then
+				movePhase = (movePhase + dt * toysAuraSettings.MoveSpeed * 0.25) % 1
+			else
+				movePhase = 0
+			end
+			if toysAuraSettings.Bob then
+				bobPhase = (bobPhase + dt * toysAuraSettings.BobSpeed * 2) % (math.pi * 2)
+			end
+
+			for i = #toysAuraSettings.Models, 1, -1 do
+				local m = toysAuraSettings.Models[i]
+				local root = tbl13.GetRoot(m)
+				if not (m and m.Parent and root and root.Parent) or not tbl13.IsToyAllowed(m) or tbl7.ToyAuraReserved[m] then
+					tbl13.RemoveModel(m, false, i)
+				elseif not tbl12.IsPartOwner(root) then
+					local _, myHrp = tbl12.Char()
+					if myHrp and (root.Position - myHrp.Position).Magnitude <= 31 then
+						tbl12.Grab(root)
+					end
+				end
+			end
+
+			local count = #toysAuraSettings.Models
+			if count == 0 then return end
+
+			local _, myHrp = tbl12.Char()
+			local centerCF = tbl13.GetCenter(myHrp) * CFrame.Angles(0, math.rad(autoRotSpin), 0)
+			local pts = tbl13.GetShape(count)
+
+			for i, m in ipairs(toysAuraSettings.Models) do
+				local root = tbl13.GetRoot(m)
+				if root then
+					local shiftedIdx = ((i - 1 + math.floor(movePhase * count)) % count) + 1
+					local pt = pts[shiftedIdx] or Vector3.zero
+					local localOffset = tbl13.GetOffset(pt)
+					if toysAuraSettings.Bob then
+						localOffset = localOffset + Vector3.new(0, math.sin(bobPhase + i * 0.6) * toysAuraSettings.BobHeight, 0)
+					end
+					local targetCF = centerCF * CFrame.new(localOffset)
+					tbl13.UpdatePhysics(m, root, targetCF, toysAuraSettings.FaceCenter, centerCF.Position)
+				end
+			end
+		end
+
+		tbl12.SetToysAuraConnection = function(enabled)
+			tbl12.SetRuntimeConnection("ToysAura", RunService.Heartbeat, enabled, tbl12.UpdateToysAura)
+			if not enabled then
+				tbl13.ClearMovers()
+			end
+		end
+
+		task.spawn(function()
+			while task.wait(0.1) do
+				if toysAuraSettings.Enabled and toysAuraSettings.OwnType == "Aura" then
+					local _, myHrp, myHum = tbl12.Char()
+					if myHrp and myHum and myHum.Health > 0 then
+						tbl13.RefreshInventories(v17)
+						tbl13.UpdateCharacterRoots()
+						for k, inv in pairs(tbl13.Candidates) do
+							if not (k.Parent and inv.Parent) then
+								tbl13.Candidates[k] = nil
+								tbl7.ToyAuraRoots[k] = nil
+							elseif not tbl7.ToyAuraReserved[k] and (not toysAuraSettings.OwnInventoryOnly or inv == v17) and tbl13.IsToyAllowed(k) then
+								releaseIfHeldByLocalPlayer(k)
+								local root = tbl13.GetRoot(k)
+								if root and (root.Position - myHrp.Position).Magnitude <= 31 then
+									tbl13.AddModel(k, true, 0.25, root)
+								end
+							end
+						end
+					end
+				end
+			end
+		end)
+
+		workspace.ChildAdded:Connect(function(child)
+			if child.Name == "GrabParts" then
+				local grabPart = child:WaitForChild("GrabPart", 0.2)
+				local weld = grabPart and grabPart:WaitForChild("WeldConstraint", 0.2)
+				local part1 = weld and weld.Part1
+				if part1 and part1:IsA("BasePart") and not part1.Anchored then
+					if toysAuraSettings.Enabled and toysAuraSettings.OwnType == "Grab" then
+						local model = part1.Parent
+						if model and model:IsA("Model") and not part1:IsDescendantOf(map) then
+							if not tbl13.Models[model] then
+								if tbl13.AddModel(model, false) then
+									tbl12.RNO(part1)
+								end
+							else
+								tbl13.RemoveModel(model, false)
+							end
+						end
+					end
+				end
+			end
+		end)
+	end
+
+	do
+		local eyeLaser = tbl7.EyeLaser
+		local laserStatusLabel = nil
+
+		local function updateLaserStatusLabel()
+			if laserStatusLabel then
+				laserStatusLabel:Set(("Active Sparklers: %d/%d"):format(#eyeLaser.Models, eyeLaser.Amount))
+			end
+		end
+
+		local function findUnusedSparklerInInventory()
+			for _, ch in ipairs(v17:GetChildren()) do
+				if ch:IsA("Model") and not eyeLaser.Parts[ch] and ch.Name:lower():find("sparkler") then
+					tbl7.ToyAuraReserved[ch] = true
+					return ch
+				end
+			end
+			return nil
+		end
+
+		local function spawnRawSparkler()
+			local existing = findUnusedSparklerInInventory()
+			if existing then return existing end
+
+			local _, hrp = tbl12.Char()
+			local nearCF = hrp and (hrp.CFrame - Vector3.new(0, 0, 20)) or nil
+			for _, candidateName in ipairs({ eyeLaser.ResolvedToyName or "FireworkSparkler", "FireworkSparkler", "Sparkler" }) do
+				tbl7.FailedToys[candidateName] = nil
+				local m = tbl12.SpawnToy(candidateName, nearCF, 1, true)
+				if m then
+					eyeLaser.ResolvedToyName = candidateName
+					return m
+				end
+			end
+			return nil
+		end
+
+		tbl12.SpawnEyeLaserSparklers = function()
+			if eyeLaser.Spawning or not tbl8.EyeLaserActive or #eyeLaser.Models >= eyeLaser.Amount then
+				return
+			end
+			eyeLaser.Spawning = true
+			local gen = eyeLaser.Generation
+
+			task.spawn(function()
+				while tbl8.EyeLaserActive and gen == eyeLaser.Generation and #eyeLaser.Models < eyeLaser.Amount do
+					local spk = spawnRawSparkler()
+					if not spk then break end
+
+					local holdPart = spk:WaitForChild("HoldPart", 0.5)
+					local soundPart = spk:WaitForChild("SoundPart", 0.5)
+					local rigid = holdPart and holdPart:WaitForChild("RigidConstraint", 0.5)
+
+					if holdPart and rigid then
+						tbl12.BreakHoldable(spk)
+					end
+
+					local rootPart = tbl12.FindNicePart(spk) or soundPart or holdPart or spk:FindFirstChildWhichIsA("BasePart", true)
+					local owned = rootPart and tbl12.SNO(rootPart, 0.45)
+					if not owned and soundPart and soundPart ~= rootPart then
+						owned = tbl12.SNO(soundPart, 0.4)
+						if owned then rootPart = soundPart end
+					end
+
+					if rootPart and spk.Parent and tbl8.EyeLaserActive and gen == eyeLaser.Generation and #eyeLaser.Models < eyeLaser.Amount then
+						for _, p in ipairs(spk:GetDescendants()) do
+							if p:IsA("BasePart") then
+								p.CanCollide = false
+								p.CanQuery = false
+								p.CanTouch = false
+								p.LocalTransparencyModifier = eyeLaser.Transparency
+							end
+						end
+						eyeLaser.Parts[spk] = { Root = rootPart, Rigid = rigid }
+						eyeLaser.Models[#eyeLaser.Models + 1] = spk
+						updateLaserStatusLabel()
+					else
+						tbl7.ToyAuraReserved[spk] = nil
+						tbl12.DestroyToy(spk)
+						break
+					end
+				end
+
+				eyeLaser.Spawning = false
+				if tbl8.EyeLaserActive and gen == eyeLaser.Generation and #eyeLaser.Models < eyeLaser.Amount then
+					task.delay(0.5, tbl12.SpawnEyeLaserSparklers)
+				end
+			end)
+		end
+
+		tbl12.UpdateEyeLaser = function()
+			if not tbl8.EyeLaserActive then return end
+			local char, hrp, hum = tbl12.Char()
+			if not (hrp and hum and hum.Health > 0) then return end
+			local head = char:FindFirstChild("Head") or hrp
+
+			pcall(function()
+				if mouse.TargetFilter ~= v17 then
+					mouse.TargetFilter = v17
+				end
+			end)
+
+			local hitPos = mouse.Hit and mouse.Hit.Position or (head.Position + head.CFrame.LookVector * eyeLaser.MaxDistance)
+			local eyeCenter = (head.CFrame * CFrame.new(0, 0.15, 0)).Position
+			local deltaVec = hitPos - eyeCenter
+			if deltaVec.Magnitude > eyeLaser.MaxDistance then
+				hitPos = eyeCenter + deltaVec.Unit * eyeLaser.MaxDistance
+			end
+
+			local leftEyePos = (head.CFrame * CFrame.new(-0.25, 0.15, 0)).Position
+			local rightEyePos = (head.CFrame * CFrame.new(0.25, 0.15, 0)).Position
+			local now = os.clock()
+
+			for i = #eyeLaser.Models, eyeLaser.Amount + 1, -1 do
+				local m = table.remove(eyeLaser.Models, i)
+				eyeLaser.Parts[m] = nil
+				tbl7.ToyAuraReserved[m] = nil
+				tbl12.DestroyToy(m)
+				updateLaserStatusLabel()
+			end
+
+			for i = #eyeLaser.Models, 1, -1 do
+				local m = eyeLaser.Models[i]
+				local info = eyeLaser.Parts[m]
+				local root = info and info.Root
+				local rigid = info and info.Rigid
+
+				if not (m and m.Parent and root and root.Parent) then
+					tbl7.ToyAuraReserved[m] = nil
+					eyeLaser.Parts[m] = nil
+					table.remove(eyeLaser.Models, i)
+					updateLaserStatusLabel()
+				else
+					if rigid and rigid.Attachment1 then
+						releaseIfHeldByLocalPlayer(m)
+					end
+
+					if tbl12.IsPartOwner(root) then
+						local total = math.max(#eyeLaser.Models, 1)
+						local startPos = (i % 2 == 1) and leftEyePos or rightEyePos
+						local pairIdx = math.ceil(i / 2)
+						local pairTotal = math.max(math.ceil(total / 2), 1)
+						local phase = (pairIdx - 1) / pairTotal
+
+						local cycle = (now * 20 + phase) % 2
+						local t = (cycle <= 1) and cycle or (2 - cycle)
+
+						local pos = startPos:Lerp(hitPos, t)
+						local dir = hitPos - startPos
+						local targetCF = (dir.Magnitude > 0.01)
+							and (CFrame.lookAt(pos, pos + dir.Unit) * CFrame.Angles(0, math.rad(90), 0))
+							or CFrame.new(pos)
+
+						if root.CFrame ~= targetCF then
+							root.CFrame = targetCF
+						end
+						tbl12.ResetVelocity(root)
+					elseif not eyeLaser.Spawning and not tbl7.States.Owning and not eyeLaser.Acquiring[root] then
+						eyeLaser.Acquiring[root] = true
+						task.spawn(function()
+							tbl12.SNO(root, 0.25)
+							eyeLaser.Acquiring[root] = nil
+						end)
+					end
+				end
+			end
+
+			if not eyeLaser.Spawning and #eyeLaser.Models < eyeLaser.Amount then
+				tbl12.SpawnEyeLaserSparklers()
+			end
+		end
+
+		tbl12.ClearEyeLaser = function()
+			tbl8.EyeLaserActive = false
+			eyeLaser.Generation = eyeLaser.Generation + 1
+			tbl12.SetRuntimeConnection("EyeLaser", RunService.Heartbeat, false)
+			pcall(function()
+				if mouse.TargetFilter == v17 then
+					mouse.TargetFilter = nil
+				end
+			end)
+			for _, m in ipairs(eyeLaser.Models) do
+				tbl7.ToyAuraReserved[m] = nil
+				tbl12.DestroyToy(m)
+			end
+			table.clear(eyeLaser.Models)
+			table.clear(eyeLaser.Parts)
+			table.clear(eyeLaser.Acquiring)
+			updateLaserStatusLabel()
+		end
+
+		tbl12.SetEyeLaser = function(state)
+			if tbl8.EyeLaserActive == state then return end
+			tbl8.EyeLaserActive = state
+			if state then
+				eyeLaser.Generation = eyeLaser.Generation + 1
+				tbl12.SetRuntimeConnection("EyeLaser", RunService.Heartbeat, true, tbl12.UpdateEyeLaser)
+				tbl12.SpawnEyeLaserSparklers()
+			else
+				tbl12.ClearEyeLaser()
+			end
+		end
+
+		tbl12.BindLaserStatusLabel = function(lbl)
+			laserStatusLabel = lbl
+			updateLaserStatusLabel()
+		end
+	end
+
+	tbl12.ExplodeMissile = function(targetArg, method, count)
+		local _, hrp = tbl12.Char()
+		if not hrp or not targetArg or not method then return false end
+		local spawnedList = {}
+		count = count or 1
+
+		for _ = 1, count do
+			local toy = tbl12.SpawnToy(method)
+			if toy then
+				local hitbox, ownerPart
+				if method == "BombMissile" or method == "FireworkMissile" then
+					hitbox = toy:WaitForChild("PartHitDetector", 0.15)
+					ownerPart = hitbox and toy:WaitForChild("Wedge", 0.15)
+				elseif method == "BombDarkMatter" then
+					hitbox = toy:WaitForChild("PartHitDetector", 0.15)
+					ownerPart = hitbox and toy:WaitForChild("Spinner", 0.15)
+				elseif method == "BombBalloon" then
+					hitbox = toy:WaitForChild("Balloon", 0.15)
+					ownerPart = hitbox
+				elseif method == "BallSnowball" then
+					hitbox = toy:WaitForChild("SnowRagdollPart", 0.15)
+					ownerPart = hitbox and toy:WaitForChild("SoundPart", 0.15)
+				end
+				if hitbox and ownerPart and tbl12.SNO(ownerPart) then
+					local bp = Instance.new("BodyPosition", ownerPart)
+					bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+					bp.Position = Vector3.new(math.random(-1000, 1000), 1000000, math.random(-1000, 1000))
+					table.insert(spawnedList, toy)
+				else
+					tbl12.DestroyToy(toy)
+				end
+			end
+		end
+
+		if #spawnedList == 0 then return false end
+
+		local resolvedTarget = (type(targetArg) == "function") and targetArg() or targetArg
+		if not resolvedTarget then return false end
+
+		for _, toy in pairs(spawnedList) do
+			local hitbox, ownerPart
+			if method == "BombMissile" or method == "FireworkMissile" then
+				hitbox = toy:WaitForChild("PartHitDetector", 0.15)
+				ownerPart = hitbox and toy:WaitForChild("Wedge", 0.15)
+			elseif method == "BombDarkMatter" then
+				hitbox = toy:WaitForChild("PartHitDetector", 0.15)
+				ownerPart = hitbox and toy:WaitForChild("Spinner", 0.15)
+			elseif method == "BombBalloon" then
+				hitbox = toy:WaitForChild("Balloon", 0.15)
+				ownerPart = hitbox
+			elseif method == "BallSnowball" then
+				hitbox = toy:WaitForChild("SnowRagdollPart", 0.15)
+				ownerPart = hitbox and toy:WaitForChild("SoundPart", 0.15)
+			end
+			if hitbox and ownerPart then
+				if method ~= "BallSnowball" then
+					if typeof(resolvedTarget) == "Instance" then
+						tbl11.Explode:FireServer({ Hitbox = hitbox, PositionPart = resolvedTarget }, resolvedTarget.Position)
+					elseif typeof(resolvedTarget) == "Vector3" then
+						tbl11.Explode:FireServer({
+							Hitbox = hitbox,
+							PositionPart = { Position = resolvedTarget, AssemblyLinearVelocity = Vector3.zero },
+						}, resolvedTarget)
+					end
+				else
+					local savedPos = hitbox.Position
+					local targetPos = typeof(resolvedTarget) == "Instance" and resolvedTarget.Position or resolvedTarget
+					for _ = 1, 2 do
+						for _, p in ipairs(toy:GetChildren()) do
+							if p:IsA("BasePart") then
+								p.CanCollide = false
+								p.CanTouch = true
+								p.Position = targetPos
+							end
+						end
+						hitbox.Velocity = Vector3.new(0, 5, 0)
+						RunService.Heartbeat:Wait()
+					end
+					hitbox.Position = savedPos
+				end
+			end
+			task.delay(0.25, tbl12.DestroyToy, toy)
+		end
+	end
+
+	do
+		local coconutForms = tbl7.CoconutForms
+		local cocoLimitLabel = nil
+
+		tbl12.SpawnCoconutForms = function()
+			if coconutForms.Spawning or not tbl8.CoconutForms or #coconutForms.Models >= #coconutForms.Offsets then return end
+			coconutForms.Spawning = true
+			local gen = coconutForms.Generation
+			task.spawn(function()
+				while tbl8.CoconutForms and gen == coconutForms.Generation and #coconutForms.Models < #coconutForms.Offsets do
+					local coco = tbl12.SpawnToy("FoodCoconut", nil, 1, true)
+					local soundPart = coco and coco:WaitForChild("SoundPart", 0.5)
+					local holdPart = coco and coco:WaitForChild("HoldPart", 0.5)
+					local rigid = holdPart and holdPart:WaitForChild("RigidConstraint", 0.5)
+					if not (soundPart and rigid and tbl12.BreakHoldable(coco) and tbl12.SNO(soundPart, 0.4)) then
+						tbl12.DestroyToy(coco)
+						break
+					else
+						for _, p in ipairs(coco:GetDescendants()) do
+							if p:IsA("BasePart") then
+								p.CanCollide = false
+								p.CanQuery = false
+								p.CanTouch = false
+								p.LocalTransparencyModifier = coconutForms.Transparency
+							end
+						end
+						if tbl8.CoconutForms and gen == coconutForms.Generation and #coconutForms.Models < #coconutForms.Offsets then
+							coconutForms.Parts[coco] = { Root = soundPart, Rigid = rigid }
+							coconutForms.Models[#coconutForms.Models + 1] = coco
+						else
+							tbl12.DestroyToy(coco)
+						end
+					end
+				end
+				coconutForms.Spawning = false
+				if tbl8.CoconutForms and #coconutForms.Models < #coconutForms.Offsets then
+					task.delay(0.5, tbl12.SpawnCoconutForms)
+				end
+			end)
+		end
+
+		tbl12.UpdateCoconutForms = function()
+			local char, hrp, hum = tbl12.Char()
+			if not (hrp and hum and hum.Health > 0) then return end
+			local now = os.clock()
+			local dt = math.min(now - (coconutForms.WingClock or now), 0.1)
+			coconutForms.WingClock = now
+			coconutForms.WingPhase = coconutForms.WingPhase + dt * coconutForms.WingSpeed
+			local wingAngle = coconutForms.WingStart and (-0.3 + math.sin(coconutForms.WingPhase) * 0.06) or nil
+			local torsoCF = (char:FindFirstChild("Torso") or hrp).CFrame
+			local leftWingCF, rightWingCF
+			if wingAngle then
+				local baseW = torsoCF * CFrame.new(0, 0.5, 0.55)
+				leftWingCF = baseW * CFrame.Angles(0, 0, -wingAngle)
+				rightWingCF = baseW * CFrame.Angles(0, 0, wingAngle)
+				for i = 1, 6 do
+					coconutForms.WingRipple[i] = math.sin(coconutForms.WingPhase - (i - 1) * 0.35) * 0.035
+				end
+			end
+			for i = #coconutForms.Models, 1, -1 do
+				local m = coconutForms.Models[i]
+				local info = coconutForms.Parts[m]
+				local root = info and info.Root
+				local rigid = info and info.Rigid
+				if not (m.Parent and root and root.Parent and rigid and rigid.Parent) or rigid.Attachment1 then
+					if m and m.Parent then tbl12.DestroyToy(m) end
+					coconutForms.Parts[m] = nil
+					table.remove(coconutForms.Models, i)
+				elseif tbl12.IsPartOwner(root) then
+					local off = coconutForms.Offsets[i]
+					local refCF = torsoCF
+					if wingAngle and i >= coconutForms.WingStart and i < coconutForms.WingStart + 12 then
+						local wIdx = i - coconutForms.WingStart
+						local side = (wIdx < 6) and -1 or 1
+						local seg = (wIdx % 6) + 1
+						local dist = (seg - 1) * coconutForms.WingSpacing * coconutForms.GlobalSpacing
+						local rip = coconutForms.WingRipple[seg] or 0
+						refCF = (side == -1) and leftWingCF or rightWingCF
+						off = CFrame.new(side * (0.55 + dist), 0.05 - (dist / 1.1) * 0.16 + rip, (dist / 1.1) * 0.06 + rip * 0.35)
+							* CFrame.Angles(rip * 0.6, side * -0.18, side * (rip * 0.8 - 0.1))
+					end
+					if off then
+						root.CFrame = refCF * off
+						tbl12.ResetVelocity(root)
+					end
+				elseif not coconutForms.Acquiring[root] then
+					coconutForms.Acquiring[root] = true
+					task.spawn(function()
+						tbl12.SNO(root, 0.25)
+						coconutForms.Acquiring[root] = nil
+					end)
+				end
+			end
+			if #coconutForms.Models < #coconutForms.Offsets then
+				tbl12.SpawnCoconutForms()
+			end
+		end
+
+		tbl12.RefreshCoconutForms = function()
+			local selected = coconutForms.Selected
+			local offsets = {}
+			local gSpace = coconutForms.GlobalSpacing or 1
+			coconutForms.Counts.Cape = (coconutForms.CapeMode == "2x3") and 6 or 12
+			coconutForms.WingStart = nil
+			coconutForms.CapeStart = nil
+
+			for _, name in ipairs(coconutForms.Order) do
+				if selected[name] and #offsets + coconutForms.Counts[name] <= coconutForms.Limit then
+					if name == "Boobs" then
+						offsets[#offsets + 1] = CFrame.new(-0.6 * gSpace, 0.5, -0.9)
+						offsets[#offsets + 1] = CFrame.new(0.6 * gSpace, 0.5, -0.9)
+					elseif name == "Ass" then
+						offsets[#offsets + 1] = CFrame.new(-0.55 * gSpace, -1, 0.75)
+						offsets[#offsets + 1] = CFrame.new(0.55 * gSpace, -1, 0.75)
+					elseif name == "Penis" then
+						offsets[#offsets + 1] = CFrame.new(-0.55 * gSpace, -1.2, -0.8)
+						offsets[#offsets + 1] = CFrame.new(0.55 * gSpace, -1.2, -0.8)
+						for i = 1, coconutForms.ShaftLength do
+							offsets[#offsets + 1] = CFrame.new(0, -1.2, -0.8 - i * coconutForms.ShaftSpacing * gSpace)
+						end
+					elseif name == "Wings" then
+						coconutForms.WingStart = #offsets + 1
+						for _ = 1, 12 do offsets[#offsets + 1] = CFrame.identity end
+					elseif name == "Cape" then
+						coconutForms.CapeStart = #offsets + 1
+						local cols = coconutForms.Counts.Cape / 3
+						local cSpace = (coconutForms.CapeSpacing or 1.3) * gSpace
+						for i = 0, coconutForms.Counts.Cape - 1 do
+							local col = (i % cols) - (cols - 1) / 2
+							local row = math.floor(i / cols)
+							offsets[#offsets + 1] = CFrame.new(col * cSpace, 0.55 - row * 1.65 * gSpace, 0.55 + row * 0.3) * CFrame.Angles(0.1, 0, 0)
+						end
+					elseif name == "67" then
+						local dir = (coconutForms.Display67 == "Show to Front") and -1 or 1
+						for k, pt in ipairs(coconutForms.Points67) do
+							local side = (k <= 7) and -1 or 1
+							offsets[#offsets + 1] = CFrame.new((pt.X + side * coconutForms.Spacing67 * 0.5) * dir * gSpace, pt.Y * gSpace, 0.75)
+						end
+					end
+				end
+			end
+
+			coconutForms.Offsets = offsets
+			coconutForms.Generation = coconutForms.Generation + 1
+			if cocoLimitLabel then
+				cocoLimitLabel:Set(("%d/%d coconuts used"):format(#offsets, coconutForms.Limit))
+			end
+			for i = #coconutForms.Models, #offsets + 1, -1 do
+				local m = table.remove(coconutForms.Models, i)
+				coconutForms.Parts[m] = nil
+				tbl12.DestroyToy(m)
+			end
+			tbl12.SetRuntimeConnection("CoconutForms", RunService.Heartbeat, tbl8.CoconutForms and #offsets > 0, tbl12.UpdateCoconutForms)
+			tbl12.SpawnCoconutForms()
+		end
+
+		tbl12.ClearCoconutForms = function()
+			tbl8.CoconutForms = false
+			coconutForms.Generation = coconutForms.Generation + 1
+			tbl12.SetRuntimeConnection("CoconutForms", RunService.Heartbeat, false)
+			for _, m in ipairs(coconutForms.Models) do tbl12.DestroyToy(m) end
+			table.clear(coconutForms.Models)
+			table.clear(coconutForms.Parts)
+			table.clear(coconutForms.WingRipple)
+			table.clear(coconutForms.Acquiring)
+		end
+
+		tbl12.SetCoconutForms = function(state)
+			if tbl8.CoconutForms == state then return end
+			tbl8.CoconutForms = state
+			if state then tbl12.RefreshCoconutForms() else tbl12.ClearCoconutForms() end
+		end
+
+		tbl12.BindCocoLabel = function(lbl)
+			cocoLimitLabel = lbl
+		end
+	end
+
+	local function getPlayerDisplayList()
+		local list = { "---" }
+		for _, p in ipairs(Players:GetPlayers()) do
+			if p ~= localPlayer then
+				table.insert(list, p.Name .. " (" .. p.DisplayName .. ")")
+			end
+		end
+		return list
+	end
+
+	local function parsePlayerFromText(str)
+		if not str or str == "---" or str == "" then return nil end
+		local uname = string.split(str, " ")[1]
+		return Players:FindFirstChild(uname)
+	end
+
+	local function getAvailableToyNames()
+		local seen = {}
+		local defaultToys = {
+			"Sparkler", "FireworkSparkler", "FireworkMissile", "BombMissile",
+			"BombDarkMatter", "BombBalloon", "BallSnowball", "NinjaShuriken", "NinjaKunai",
+			"FoodHamburger", "FoodCoconut", "FoodBanana", "FoodBread", "FoodBroccoli",
+			"FoodCakePink", "FoodDippyEgg", "FoodDonut", "FoodFrenchFries", "FoodHotdog",
+			"FoodMayonnaise", "FoodMeatStick", "FoodMushroomPoison", "FoodPizzaCheese",
+			"FoodPizzaPepperoni", "FoodSodaCan", "CupMugBrown", "CupMugWhite",
+			"PoopPile", "PoopPileSparkle",
+			"InstrumentDrumBongos", "InstrumentBrassTrumpet", "InstrumentBrassBugle",
+			"InstrumentVoiceMicrophone", "InstrumentWoodwindOcarina", "InstrumentGuitarUkulele",
+			"InstrumentGuitarLyre", "InstrumentGuitarBanjo", "InstrumentGuitarAcoustic",
+			"PalletLightBrown", "YouDecoy", "Campfire", "OvenDarkGray", "OvenMicrowaveWhite",
+			"Boombox", "CreatureBlobman", "TractorGreen", "SantaSleigh", "DiceSmall", "SprayCanWD",
+		}
+		for _, name in ipairs(defaultToys) do seen[name] = true end
+		for _, ch in ipairs(v17:GetChildren()) do
+			if ch:IsA("Model") then seen[ch.Name] = true end
+		end
+		for _, inv in ipairs(tbl7.Inventories) do
+			if inv and inv.Parent then
+				for _, ch in ipairs(inv:GetChildren()) do
+					if ch:IsA("Model") then seen[ch.Name] = true end
+				end
+			end
+		end
+		local list = { "Sparkler", "FireworkSparkler" }
+		seen["Sparkler"] = nil
+		seen["FireworkSparkler"] = nil
+		local rest = {}
+		for name in pairs(seen) do table.insert(rest, name) end
+		table.sort(rest)
+		for _, name in ipairs(rest) do table.insert(list, name) end
+		return list
+	end
+
+	do
+		local taSec = v650:AddSection({ Name = "Toys Aura" })
+		local ta = tbl7.ToysAuraSettings
+
+		taSec:AddToggle({
+			Name = "Enabled",
+			Default = ta.Enabled,
+			Callback = function(v)
+				ta.Enabled = v
+				tbl12.SetToysAuraConnection(v)
+			end,
+			Flag = "toysaura_enabled",
+		})
+
+		taSec:AddDropdown({
+			Name = "Shape",
+			Default = ta.Shape,
+			Options = tbl13.ShapeNames,
+			Callback = function(v)
+				ta.Shape = v
+				table.clear(tbl13.ShapeCache)
+			end,
+			Flag = "toysaura_shape",
+		})
+
+		taSec:AddLabel("Grabbing")
+
+		taSec:AddDropdown({
+			Name = "Grab Type",
+			Default = ta.OwnType,
+			Options = { "Aura", "Grab", "None" },
+			Callback = function(v) ta.OwnType = v end,
+			Flag = "toysaura_grabtype",
+		})
+
+		taSec:AddToggle({
+			Name = "Limit Toys",
+			Default = ta.LimitEnabled,
+			Callback = function(v)
+				ta.LimitEnabled = v
+				tbl13.TrimModels()
+			end,
+			Flag = "toysaura_limit_toggle",
+		})
+
+		addIntSlider(taSec, {
+			Name = "Toys Limit",
+			Min = 1,
+			Max = 100,
+			Default = ta.Limit,
+			Callback = function(v)
+				ta.Limit = v
+				tbl13.TrimModels()
+			end,
+			Flag = "toysaura_limit_slider",
+		})
+
+		taSec:AddToggle({
+			Name = "Only Your Inventory",
+			Default = ta.OwnInventoryOnly,
+			Callback = function(v)
+				ta.OwnInventoryOnly = v
+				if v then
+					for i = #ta.Models, 1, -1 do
+						local m = ta.Models[i]
+						if m and not m:IsDescendantOf(v17) then
+							tbl13.RemoveModel(m, true)
+						end
+					end
+				end
+			end,
+			Flag = "toysaura_owninv",
+		})
+
+		local filterLabel = nil
+		local function updateFilterLabel()
+			if not filterLabel then return end
+			local names = {}
+			for k in pairs(ta.AllowedToys) do table.insert(names, k) end
+			table.sort(names)
+			filterLabel:Set("Allowed Toys: " .. (#names > 0 and table.concat(names, ", ") or "None"))
+		end
+
+		taSec:AddToggle({
+			Name = "Only Specific Toys",
+			Default = ta.FilterToysEnabled,
+			Callback = function(v)
+				ta.FilterToysEnabled = v
+				if v then tbl13.FilterExistingModels() end
+			end,
+			Flag = "toysaura_filter_toggle",
+		})
+
+		local toyFilterDD = taSec:AddDropdown({
+			Name = "Select Toy for Filter",
+			Default = "Sparkler",
+			Options = getAvailableToyNames(),
+			Callback = function(v) ta.SelectedFilterToy = v end,
+			Flag = "toysaura_filter_select",
+		})
+
+		taSec:AddButton({
+			Name = "Add / Remove Selected Toy",
+			Callback = function()
+				local tName = ta.SelectedFilterToy
+				if not tName or tName == "" then return end
+				if ta.AllowedToys[tName] then
+					ta.AllowedToys[tName] = nil
+					fn18("Removed from filter: " .. tName, "Toys Aura")
+				else
+					ta.AllowedToys[tName] = true
+					fn18("Added to filter: " .. tName, "Toys Aura")
+				end
+				updateFilterLabel()
+				if ta.FilterToysEnabled then tbl13.FilterExistingModels() end
+			end,
+		})
+
+		taSec:AddButton({
+			Name = "Add / Remove Mouse Target Toy",
+			Callback = function()
+				local t = tbl12.GetTarget()
+				local model = t and t:FindFirstAncestorOfClass("Model")
+				if not model or model:IsDescendantOf(map) or Players:GetPlayerFromCharacter(model) then
+					return fn18("Point your mouse at a toy first!", "Toys Aura")
+				end
+				local tName = model.Name
+				if ta.AllowedToys[tName] then
+					ta.AllowedToys[tName] = nil
+					fn18("Removed from filter: " .. tName, "Toys Aura")
+				else
+					ta.AllowedToys[tName] = true
+					fn18("Added to filter: " .. tName, "Toys Aura")
+				end
+				updateFilterLabel()
+				if ta.FilterToysEnabled then tbl13.FilterExistingModels() end
+			end,
+		})
+
+		taSec:AddButton({
+			Name = "Refresh Toy List from Map",
+			Callback = function()
+				toyFilterDD:Refresh(getAvailableToyNames(), true)
+				fn18("Toy list refreshed!", "Toys Aura")
+			end,
+		})
+
+		taSec:AddButton({
+			Name = "Clear Toy Filter",
+			Callback = function()
+				table.clear(ta.AllowedToys)
+				updateFilterLabel()
+				fn18("Cleared toy filter list!", "Toys Aura")
+			end,
+		})
+
+		filterLabel = taSec:AddLabel("Allowed Toys: None")
+
+		taSec:AddButton({
+			Name = "Grab All Toys",
+			Callback = function()
+				task.spawn(function()
+					local invs = ta.OwnInventoryOnly and { v17 } or tbl7.Inventories
+					if not ta.OwnInventoryOnly and not table.find(invs, v17) then
+						table.insert(invs, 1, v17)
+					end
+					for _, inv in pairs(invs) do
+						if inv and inv.Parent then
+							for _, ch in pairs(inv:GetChildren()) do
+								if ch:IsA("Model") and ch.Name ~= "ShurikenRSC" and not tbl7.ToyAuraReserved[ch] and tbl13.IsToyAllowed(ch) then
+									tbl13.AddModel(ch, true, 0.25)
+								end
+							end
+							task.wait()
+						end
+					end
+					fn18("Grabbed " .. tostring(#ta.Models) .. " toys!", "Toys Aura")
+				end)
+			end,
+		})
+
+		taSec:AddButton({
+			Name = "Release Toys",
+			Callback = function()
+				tbl13.ClearModels(true)
+				fn18("Released all toys!", "Toys Aura")
+			end,
+		})
+
+		taSec:AddToggle({
+			Name = "Face Center",
+			Default = ta.FaceCenter,
+			Callback = function(v) ta.FaceCenter = v end,
+			Flag = "toysaura_facecenter",
+		})
+
+		taSec:AddLabel("Shape Movement")
+
+		taSec:AddToggle({
+			Name = "Auto Move",
+			Default = ta.AutoMove,
+			Callback = function(v) ta.AutoMove = v end,
+			Flag = "toysaura_automove",
+		})
+
+		taSec:AddSlider({
+			Name = "Move Speed",
+			Min = 0.1,
+			Max = 25,
+			Default = ta.MoveSpeed,
+			Callback = function(v) ta.MoveSpeed = v end,
+			Flag = "toysaura_movespeed",
+		})
+
+		taSec:AddToggle({
+			Name = "Auto Rotate",
+			Default = ta.AutoRotate,
+			Callback = function(v) ta.AutoRotate = v end,
+			Flag = "toysaura_autorotate",
+		})
+
+		taSec:AddSlider({
+			Name = "Rotate Speed",
+			Min = 0.1,
+			Max = 20,
+			Default = ta.RotationSpeed,
+			Callback = function(v) ta.RotationSpeed = v end,
+			Flag = "toysaura_rotatespeed",
+		})
+
+		taSec:AddToggle({
+			Name = "Bob",
+			Default = ta.Bob,
+			Callback = function(v) ta.Bob = v end,
+			Flag = "toysaura_bob",
+		})
+
+		taSec:AddSlider({
+			Name = "Bob Height",
+			Min = 0,
+			Max = 50,
+			Default = ta.BobHeight,
+			Callback = function(v) ta.BobHeight = v end,
+			Flag = "toysaura_bobheight",
+		})
+
+		taSec:AddSlider({
+			Name = "Bob Speed",
+			Min = 0.1,
+			Max = 12,
+			Default = ta.BobSpeed,
+			Callback = function(v) ta.BobSpeed = v end,
+			Flag = "toysaura_bobspeed",
+		})
+
+		taSec:AddLabel("Shape Size")
+
+		addIntSlider(taSec, {
+			Name = "Radius",
+			Min = 5,
+			Max = 200,
+			Default = ta.Radius,
+			Callback = function(v) ta.Radius = v end,
+			Flag = "toysaura_radius",
+		})
+
+		addIntSlider(taSec, {
+			Name = "Height",
+			Min = 0,
+			Max = 200,
+			Default = ta.Height,
+			Callback = function(v) ta.Height = v end,
+			Flag = "toysaura_height",
+		})
+
+		taSec:AddSlider({
+			Name = "Spread",
+			Min = 0.25,
+			Max = 3,
+			Default = ta.Spacing,
+			Callback = function(v) ta.Spacing = v end,
+			Flag = "toysaura_spread",
+		})
+
+		addIntSlider(taSec, {
+			Name = "Rows",
+			Min = 1,
+			Max = 20,
+			Default = ta.Rows,
+			Callback = function(v)
+				ta.Rows = v
+				table.clear(tbl13.ShapeCache)
+			end,
+			Flag = "toysaura_rows",
+		})
+
+		taSec:AddSlider({
+			Name = "Turns",
+			Min = 0,
+			Max = 12,
+			Default = ta.Rotations,
+			Callback = function(v)
+				ta.Rotations = v
+				table.clear(tbl13.ShapeCache)
+			end,
+			Flag = "toysaura_turns",
+		})
+
+		taSec:AddLabel("Position")
+
+		taSec:AddDropdown({
+			Name = "Position Type",
+			Default = ta.PosType,
+			Options = { "You", "Mouse", "Players", "Custom Pos" },
+			Callback = function(v)
+				ta.PosType = v
+			end,
+			Flag = "toysaura_postype",
+		})
+
+		local taPlayerDD = taSec:AddDropdown({
+			Name = "Select Player (For Position: Players)",
+			Default = "---",
+			Options = getPlayerDisplayList(),
+			Callback = function(v)
+				tbl9.SelectedTAPlayer = parsePlayerFromText(v)
+			end,
+			Flag = "toysaura_targetplayer",
+		})
+
+		Players.PlayerAdded:Connect(function()
+			task.wait(0.3)
+			taPlayerDD:Refresh(getPlayerDisplayList(), true)
+		end)
+		Players.PlayerRemoving:Connect(function()
+			task.wait(0.2)
+			taPlayerDD:Refresh(getPlayerDisplayList(), true)
+		end)
+
+		taSec:AddButton({
+			Name = "Set Custom Position",
+			Callback = function()
+				local _, hrp = tbl12.Char()
+				if hrp then
+					ta.CustomPos = CFrame.new(hrp.Position)
+					fn18("Custom position set!", "Toys Aura")
+				end
+			end,
+		})
+
+		taSec:AddLabel("Offset")
+
+		addIntSlider(taSec, {
+			Name = "X Offset",
+			Min = -100,
+			Max = 100,
+			Default = ta.Offset.X,
+			Callback = function(v) ta.Offset = CFrame.new(v, ta.Offset.Y, ta.Offset.Z) end,
+			Flag = "toysaura_xo",
+		})
+
+		addIntSlider(taSec, {
+			Name = "Y Offset",
+			Min = -100,
+			Max = 100,
+			Default = ta.Offset.Y,
+			Callback = function(v) ta.Offset = CFrame.new(ta.Offset.X, v, ta.Offset.Z) end,
+			Flag = "toysaura_yo",
+		})
+
+		addIntSlider(taSec, {
+			Name = "Z Offset",
+			Min = -100,
+			Max = 100,
+			Default = ta.Offset.Z,
+			Callback = function(v) ta.Offset = CFrame.new(ta.Offset.X, ta.Offset.Y, v) end,
+			Flag = "toysaura_zo",
+		})
+
+		taSec:AddLabel("Shape Rotation")
+
+		addIntSlider(taSec, {
+			Name = "X Rotation",
+			Min = -180,
+			Max = 180,
+			Default = ta.Rotation.X,
+			Callback = function(v) ta.Rotation = Vector3.new(v, ta.Rotation.Y, ta.Rotation.Z) end,
+			Flag = "toysaura_xr",
+		})
+
+		addIntSlider(taSec, {
+			Name = "Y Rotation",
+			Min = -180,
+			Max = 180,
+			Default = ta.Rotation.Y,
+			Callback = function(v) ta.Rotation = Vector3.new(ta.Rotation.X, v, ta.Rotation.Z) end,
+			Flag = "toysaura_yr",
+		})
+
+		addIntSlider(taSec, {
+			Name = "Z Rotation",
+			Min = -180,
+			Max = 180,
+			Default = ta.Rotation.Z,
+			Callback = function(v) ta.Rotation = Vector3.new(ta.Rotation.X, ta.Rotation.Y, v) end,
+			Flag = "toysaura_zr",
+		})
+	end
+
+	do
+		local laserSec = v650:AddSection({ Name = "Eye Laser" })
+		local el = tbl7.EyeLaser
+
+		laserSec:AddKeybind({
+			Name = "Hold Laser Keybind",
+			Default = el.Keybind,
+			Callback = function(k)
+				el.Keybind = k
+			end,
+			Flag = "eyelaser_keybind",
+		})
+
+		UserInputService.InputBegan:Connect(function(inp, gp)
+			if gp or UserInputService:GetFocusedTextBox() then return end
+			if el.Keybind ~= Enum.KeyCode.Unknown and inp.KeyCode == el.Keybind then
+				tbl12.SetEyeLaser(true)
+			end
+		end)
+
+		UserInputService.InputEnded:Connect(function(inp)
+			if el.Keybind ~= Enum.KeyCode.Unknown and inp.KeyCode == el.Keybind then
+				tbl12.SetEyeLaser(false)
+			end
+		end)
+
+		addIntSlider(laserSec, {
+			Name = "Sparkler Amount",
+			Min = 1,
+			Max = 17,
+			Default = el.Amount,
+			Callback = function(v)
+				el.Amount = v
+				if tbl8.EyeLaserActive then
+					tbl12.SpawnEyeLaserSparklers()
+				end
+			end,
+			Flag = "eyelaser_amount",
+		})
+
+		addIntSlider(laserSec, {
+			Name = "Max Laser Distance",
+			Min = 15,
+			Max = 300,
+			Default = el.MaxDistance,
+			Callback = function(v)
+				el.MaxDistance = v
+			end,
+			Flag = "eyelaser_maxdist",
+		})
+
+		laserSec:AddSlider({
+			Name = "Sparkler Stick Transparency",
+			Min = 0,
+			Max = 1,
+			Default = el.Transparency,
+			Callback = function(v)
+				el.Transparency = v
+				for _, m in ipairs(el.Models) do
+					for _, p in ipairs(m:GetDescendants()) do
+						if p:IsA("BasePart") then
+							p.LocalTransparencyModifier = v
+						end
+					end
+				end
+			end,
+			Flag = "eyelaser_trans",
+		})
+
+		tbl12.BindLaserStatusLabel(laserSec:AddLabel("Active Sparklers: 0/" .. tostring(el.Amount)))
+	end
+
+	do
+		local expSec = v650:AddSection({ Name = "Explosions" })
+		local selectedExpPlr = nil
+		local expAddKey = Enum.KeyCode.Unknown
+		local expMouseKey = Enum.KeyCode.Unknown
+
+		local expTargetDD = expSec:AddDropdown({
+			Name = "Targets",
+			Default = "---",
+			Options = getPlayerDisplayList(),
+			Callback = function(v)
+				selectedExpPlr = parsePlayerFromText(v)
+				if selectedExpPlr then
+					tbl7.SelectedPlayersExp[selectedExpPlr] = true
+				end
+			end,
+			Flag = "explosions_target",
+		})
+
+		Players.PlayerAdded:Connect(function()
+			task.wait(0.3)
+			expTargetDD:Refresh(getPlayerDisplayList(), true)
+		end)
+		Players.PlayerRemoving:Connect(function()
+			task.wait(0.2)
+			expTargetDD:Refresh(getPlayerDisplayList(), true)
+		end)
+
+		expSec:AddKeybind({
+			Name = "Add To List",
+			Default = Enum.KeyCode.Unknown,
+			Callback = function(k) expAddKey = k end,
+			Flag = "explosions_addkey",
+		})
+
+		UserInputService.InputBegan:Connect(function(inp, gp)
+			if gp then return end
+			if expAddKey ~= Enum.KeyCode.Unknown and inp.KeyCode == expAddKey then
+				local p = selectedExpPlr
+				if mouse.Target then
+					local m = mouse.Target:FindFirstAncestorOfClass("Model")
+					local mp = m and Players:GetPlayerFromCharacter(m)
+					if mp and mp ~= localPlayer then p = mp end
+				end
+				if p then
+					if tbl7.SelectedPlayersExp[p] then
+						tbl7.SelectedPlayersExp[p] = nil
+						fn18("Removed " .. p.DisplayName, "Explosions")
+					else
+						tbl7.SelectedPlayersExp[p] = true
+						fn18("Added " .. p.DisplayName, "Explosions")
+					end
+				end
+			end
+			if expMouseKey ~= Enum.KeyCode.Unknown and inp.KeyCode == expMouseKey then
+				task.spawn(function()
+					tbl12.ExplodeMissile(function()
+						return tbl12.GetHit().Position
+					end, tbl9.ExplosionMethod or "BombMissile", tbl9.MissilesToFire)
+				end)
+			end
+		end)
+
+		expSec:AddDropdown({
+			Name = "Explosion Type",
+			Default = "BombMissile",
+			Options = { "BombMissile", "BombDarkMatter", "BombBalloon", "BallSnowball", "FireworkMissile" },
+			Callback = function(v) tbl9.ExplosionMethod = v end,
+			Flag = "explosions_type",
+		})
+
+		addIntSlider(expSec, {
+			Name = "How much to fire at once?",
+			Min = 1,
+			Max = 17,
+			Default = 1,
+			Callback = function(v) tbl9.MissilesToFire = v end,
+			Flag = "explosions_amount",
+		})
+
+		expSec:AddLabel('Only go above 8 if you have "Raised Toys Limit" Gamepass!')
+
+		expSec:AddToggle({
+			Name = "Auto Explode Target",
+			Default = false,
+			Callback = function(state)
+				tbl8.AutoExplodeTarget = state
+				task.spawn(function()
+					while tbl8.AutoExplodeTarget and task.wait(0.1) do
+						if tbl9.ExplosionMethod and not (inPlot.Value and not inOwnedPlot.Value) then
+							for plr in pairs(tbl7.SelectedPlayersExp) do
+								if not tbl8.AutoExplodeTarget then break end
+								if plr.Parent == Players then
+									local blocked = plr.InPlot.Value and not (localPlayer.InOwnedPlot.Value or tbl9.ExplosionMethod == "BallSnowball")
+									if not blocked then
+										local _, tHrp, tHum = tbl12.Char(plr)
+										if tHrp and tHum and tHum.Health ~= 0 and not tbl7.States.Owning then
+											tbl12.ExplodeMissile(tHrp, tbl9.ExplosionMethod, tbl9.MissilesToFire)
+										end
+									end
+								end
+							end
+						end
+					end
+				end)
+			end,
+			Flag = "explosions_auto",
+		})
+
+		expSec:AddKeybind({
+			Name = "Explode on Mouse",
+			Default = Enum.KeyCode.Unknown,
+			Callback = function(k) expMouseKey = k end,
+			Flag = "explosions_mousekey",
+		})
+	end
+
+	do
+		local miscSec = v650:AddSection({ Name = "Coconut Forms" })
+		local cf = tbl7.CoconutForms
+
+		miscSec:AddToggle({
+			Name = "Coconut Forms",
+			Default = false,
+			Callback = tbl12.SetCoconutForms,
+			Flag = "coco_master",
+		})
+
+		for _, formName in ipairs(cf.Names) do
+			miscSec:AddToggle({
+				Name = "Form: " .. formName,
+				Default = false,
+				Callback = function(v)
+					cf.Selected[formName] = v or nil
+					local idx = table.find(cf.Order, formName)
+					if v and not idx then
+						table.insert(cf.Order, formName)
+					elseif not v and idx then
+						table.remove(cf.Order, idx)
+					end
+					tbl12.RefreshCoconutForms()
+				end,
+				Flag = "coco_form_" .. formName,
+			})
+		end
+
+		miscSec:AddSlider({
+			Name = "Overall Form Spacing",
+			Min = 0.5,
+			Max = 3,
+			Default = cf.GlobalSpacing,
+			Callback = function(v)
+				cf.GlobalSpacing = v
+				tbl12.RefreshCoconutForms()
+			end,
+			Flag = "coco_globalspace",
+		})
+
+		miscSec:AddSlider({
+			Name = "Transparency",
+			Min = 0,
+			Max = 1,
+			Default = cf.Transparency,
+			Callback = function(v)
+				cf.Transparency = v
+				for _, m in ipairs(cf.Models) do
+					for _, p in ipairs(m:GetDescendants()) do
+						if p:IsA("BasePart") then p.LocalTransparencyModifier = v end
+					end
+				end
+			end,
+			Flag = "coco_trans",
+		})
+
+		addIntSlider(miscSec, {
+			Name = "Penis Shaft Length",
+			Min = 2,
+			Max = 11,
+			Default = cf.ShaftLength,
+			Callback = function(v)
+				cf.ShaftLength = v
+				cf.Counts.Penis = cf.ShaftLength + 2
+				tbl12.RefreshCoconutForms()
+			end,
+			Flag = "coco_penislen",
+		})
+
+		miscSec:AddSlider({
+			Name = "Penis Shaft Spacing",
+			Min = 0.9,
+			Max = 3,
+			Default = cf.ShaftSpacing,
+			Callback = function(v)
+				cf.ShaftSpacing = v
+				tbl12.RefreshCoconutForms()
+			end,
+			Flag = "coco_penisspace",
+		})
+
+		miscSec:AddSlider({
+			Name = "Wings Spacing",
+			Min = 0.9,
+			Max = 3,
+			Default = cf.WingSpacing,
+			Callback = function(v)
+				cf.WingSpacing = v
+			end,
+			Flag = "coco_wingspace",
+		})
+
+		miscSec:AddSlider({
+			Name = "Cape Spacing",
+			Min = 0.8,
+			Max = 3,
+			Default = cf.CapeSpacing,
+			Callback = function(v)
+				cf.CapeSpacing = v
+				tbl12.RefreshCoconutForms()
+			end,
+			Flag = "coco_capespace",
+		})
+
+		miscSec:AddDropdown({
+			Name = "Cape Layout",
+			Default = cf.CapeMode,
+			Options = { "2x3", "4x3" },
+			Callback = function(v)
+				cf.CapeMode = v
+				tbl12.RefreshCoconutForms()
+			end,
+			Flag = "coco_capemode",
+		})
+
+		miscSec:AddSlider({
+			Name = "67 Spacing",
+			Min = 0,
+			Max = 3,
+			Default = cf.Spacing67,
+			Callback = function(v)
+				cf.Spacing67 = v
+				tbl12.RefreshCoconutForms()
+			end,
+			Flag = "coco_67space",
+		})
+
+		miscSec:AddDropdown({
+			Name = "67 Direction",
+			Default = cf.Display67,
+			Options = { "Show to Front", "Show to Back" },
+			Callback = function(v)
+				cf.Display67 = v
+				tbl12.RefreshCoconutForms()
+			end,
+			Flag = "coco_67dir",
+		})
+
+		tbl12.BindCocoLabel(miscSec:AddLabel("0/13 coconuts used"))
+	end
+end)()
 local v651 = v646:MakeTab({
 	Name = 'Teleport',
 	Icon = 'rbxassetid://7733992829',
@@ -4997,100 +7672,6 @@ task.spawn(function()
 	end
 end)
 
-local v869 = v650:AddSection({
-	Name = 'Snowball',
-})
-
-v869:AddSlider({
-	Name = 'Ammount',
-	Min = 5,
-	Max = snowballMaxAmmount,
-	Default = 5,
-	Color = Color3.fromRGB(255, 255, 255),
-	Increment = 1,
-	ValueName = 'Snowballs you want to make to explode them!',
-	Callback = function(p870)
-		u843 = p870
-	end,
-	Save = true,
-	Flag = 'ammountsnowballtomake_slider',
-})
-
-automakesnowballtoggle = nil
-automakesnowballtoggle = v869:AddToggle({
-	Name = 'Auto Make Snowball',
-	Default = false,
-	Callback = function(p871)
-		_G.SnowbalEffectSpam = p871
-
-		if p871 then
-			snowballEffectConnection = u17.ChildAdded:Connect(newSnowball)
-
-			task.spawn(function()
-				while _G.SnowbalEffectSpam do
-					if u843 > countToys('BallSnowball') then
-						SpawnToy({
-							'BallSnowball',
-							CFrame.new(-389, 228, 550, -0.3092496991157532, 0.2610282301902771, -0.9144555330276489, 0, 0.9615919589996338, 0.2744831442832947, 0.9509809017181396, 0.08488383144140244, -0.2973720133304596),
-							Vector3.new(0, 97.69000244140625, 0),
-						})
-						task.wait(0.1)
-					end
-					if u843 <= CountGrownSnowsballs() then
-						automakesnowballtoggle:Set(false)
-					end
-
-					task.wait()
-				end
-			end)
-			task.spawn(function()
-				holdOwnership()
-			end)
-
-			local v872 = u17
-			local v873, v874, v875 = ipairs(v872:GetChildren())
-
-			while true do
-				local v876
-
-				v875, v876 = v873(v874, v875)
-
-				if v875 == nil then
-					break
-				end
-
-				newSnowball(v876)
-			end
-		elseif snowballEffectConnection then
-			snowballEffectConnection:Disconnect()
-		end
-	end,
-	Save = true,
-	Flag = 'autofarmsnowball_toggle',
-})
-
-local _ = v869:AddLabel('Grown Snowballs:')
-
-v869:AddButton({
-	Name = 'Explode Snowballs',
-	Callback = function()
-		local v877, v878, v879 = pairs(u842)
-
-		while true do
-			local v880
-
-			v879, v880 = v877(v878, v879)
-
-			if v879 == nil then
-				break
-			end
-			if v879:IsDescendantOf(_Workspace) then
-				ExplodeSb(v879.Parent)
-			end
-		end
-	end,
-})
-
 spamexplosiontype = nil
 spamexplosiontarget = 0
 bombsammountoexplode = 1
@@ -5177,218 +7758,6 @@ function ExplodeFw()
 	end
 end
 
-firework_section = v650:AddSection({
-	Name = 'Explosions Spam',
-})
-explosionexplanation = v650:AddSection({
-	Name = 'FAQ about (Explosions Spam)',
-})
-
-firework_section:AddToggle({
-	Name = 'Explode',
-	Default = false,
-	Callback = function(p890)
-		_G.FireworkEffectSpam = p890
-
-		if p890 then
-			task.spawn(function()
-				while _G.FireworkEffectSpam do
-					local v891 = GetPlayerCFrame()
-
-					if countToys(spamexplosiontype) < bombsammountoexplode and not reachedrightammount and (spamexplosiontarget ~= 2 or GetFakeAim()) and v891 then
-						SpawnToy({
-							spamexplosiontype,
-							CFrame.new(v891.Position.X, v891.Position.Y, v891.Position.Z, -0.3092496991157532, 0.2610282301902771, -0.9144555330276489, 0, 0.9615919589996338, 0.2744831442832947, 0.9509809017181396, 0.08488383144140244, -0.2973720133304596),
-							Vector3.new(0, 97.69000244140625, 0),
-						})
-					end
-
-					task.wait()
-				end
-			end)
-			task.spawn(function()
-				while _G.FireworkEffectSpam do
-					local v892 = u17
-					local v893, v894, v895 = pairs(v892:GetChildren())
-
-					while true do
-						local v896
-
-						v895, v896 = v893(v894, v895)
-
-						if v895 == nil then
-							break
-						end
-						if v896.Name == spamexplosiontype then
-							local v897 = nil
-
-							if spamexplosiontype ~= 'BombDarkMatter' then
-								if spamexplosiontype ~= 'BombMissile' then
-									if spamexplosiontype ~= 'BombBalloon' then
-										if spamexplosiontype ~= 'FireworkMissile' then
-											if spamexplosiontype == 'PresentBig' or spamexplosiontype == 'PresentSmall' then
-												v897 = v896:FindFirstChild('Box')
-											end
-										else
-											v897 = v896:FindFirstChild('Hitbox')
-										end
-									else
-										v897 = v896:FindFirstChild('Balloon')
-									end
-								else
-									v897 = v896:FindFirstChild('Body')
-								end
-							else
-								v897 = v896:FindFirstChild('Pyramid')
-							end
-							if v897 and not SNOWshipOnce(v897) and _LocalPlayer:DistanceFromCharacter(v897.Position) > 30 then
-								DeleteToyRE:FireServer(v896)
-								print('Deletado!')
-							elseif v897 and CheckNetworkOwnerShipOnPart(v897) and not v896:GetAttribute('MissileTeleported') then
-								wait()
-
-								if v896.PrimaryPart then
-									local _BodyVelocity3 = Instance.new('BodyVelocity', v896.PrimaryPart)
-
-									_BodyVelocity3.Velocity = Vector3.new(0, 0, 0)
-									_BodyVelocity3.MaxForce = Vector3.new(1, 1, 1) * math.huge
-
-									v896:SetPrimaryPartCFrame(CFrame.new(math.random(-1000, 1000), 10000, math.random(-1000, 1000)))
-									v896:SetAttribute('MissileTeleported', true)
-								end
-
-								print('ownershipped!')
-							end
-						end
-					end
-
-					task.wait(0.1)
-				end
-			end)
-			task.spawn(function()
-				while _G.FireworkEffectSpam do
-					if countToys(spamexplosiontype) < bombsammountoexplode then
-						_G.CanExplodeBombs = false
-					else
-						if spamexplosiontarget ~= 2 or not _G.FireBomb then
-							if spamexplosiontarget ~= 2 then
-								canExplode = true
-							end
-						else
-							canExplode = true
-						end
-
-						_G.CanExplodeBombs = true
-
-						if canExplode then
-							ExplodeFw()
-
-							reachedrightammount = false
-							canExplode = false
-						end
-					end
-
-					task.wait()
-				end
-			end)
-			task.spawn(function()
-				while _G.FireworkEffectSpam do
-					if spamexplosiontarget == 2 then
-						GetFakeAim2()
-					end
-
-					wait(0.1)
-				end
-			end)
-		end
-	end,
-})
-firework_section:AddDropdown({
-	Name = 'Explosion Type',
-	Default = 'Firework',
-	Options = {
-		'Firework',
-		'Missile',
-		'Void',
-		'Ballon',
-		'Small Present',
-		'Big Present',
-	},
-	Callback = function(p899)
-		if p899 == 'Firework' then
-			spamexplosiontype = 'FireworkMissile'
-		elseif p899 == 'Missile' then
-			spamexplosiontype = 'BombMissile'
-		elseif p899 == 'Void' then
-			spamexplosiontype = 'BombDarkMatter'
-		elseif p899 == 'Ballon' then
-			spamexplosiontype = 'BombBalloon'
-		elseif p899 == 'Small Present' then
-			spamexplosiontype = 'PresentSmall'
-		elseif p899 == 'Big Present' then
-			spamexplosiontype = 'PresentBig'
-		end
-	end,
-})
-firework_section:AddSlider({
-	Name = 'Ammount to Explode',
-	Min = 1,
-	Max = maxBombstoexplode,
-	Default = 1,
-	Color = Color3.fromRGB(255, 255, 255),
-	Increment = 1,
-	ValueName = 'to explode the player brutally',
-	Callback = function(p900)
-		bombsammountoexplode = p900
-	end,
-})
-firework_section:AddSlider({
-	Name = 'Delay',
-	Min = 0,
-	Max = 1,
-	Default = 0,
-	Color = Color3.fromRGB(255, 255, 255),
-	Increment = 0.1,
-	ValueName = 'interval between every explosion',
-	Callback = function(p901)
-		explosionInterval = p901
-	end,
-})
-firework_section:AddDropdown({
-	Name = 'Target',
-	Default = 'Spawn',
-	Options = {
-		'Spawn',
-		'Player',
-		'Mouse',
-	},
-	Callback = function(p902)
-		if p902 == 'Spawn' then
-			spamexplosiontarget = 0
-		elseif p902 == 'Player' then
-			spamexplosiontarget = 1
-		elseif p902 == 'Mouse' then
-			spamexplosiontarget = 2
-		end
-	end,
-})
-
-PlayerToTarget = firework_section:AddDropdown({
-	Name = 'Select Player',
-	Default = 'Macaco (negro)',
-	Options = {
-		'',
-	},
-	Callback = function(p903)
-		local v904 = string.split(p903, ' ')
-
-		_G.TargetToBombPlayer = v904[1]
-	end,
-})
-
-explosionexplanation:AddParagraph('How to use target mouse?', 'Press/Hold the keybind (F) and then BOOM!')
-explosionexplanation:AddParagraph('How to target player?', 'Select Target to Player and then select the player you want to target')
-explosionexplanation:AddParagraph('How to change the explosive', 'Click on Explosive Type and select any type')
 _LocalPlayer.Idled:connect(function()
 	_VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 	wait(1)
@@ -9979,6 +12348,275 @@ v1347:AddDropdown({
         'Tip:',
         'Higher Lag Intensity = faster kick, but may lag your own client. 520 is a good balance.'
     )
+    
+    local floodSec = ServerTab:AddSection({ Name = 'Tsunami Flood' })
+    local StickyEvent = _ReplicatedStorage:WaitForChild('PlayerEvents'):WaitForChild('StickyPartEvent')
+
+    local function f3(p3, p4)
+        task.spawn(function()
+            SpawnToyRF:InvokeServer(p3, p4, Vector3.zero)
+        end)
+    end
+
+    local function makeBodyPosition(name2)
+        local character = _LocalPlayer.Character
+        if not character then return end
+        local humanoidRootPart2 = character:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart2 then return end
+
+        while true do
+            task.wait()
+            if humanoidRootPart2 and _LocalPlayer.CanSpawnToy.Value and not _LocalPlayer.InPlot.Value then
+                break
+            end
+        end
+
+        f3("NinjaShuriken", humanoidRootPart2.CFrame * CFrame.new(0, 15, 20))
+        local waitForChild4 = u17:WaitForChild("NinjaShuriken", 1)
+        if not waitForChild4 then return end
+
+        local waitForChild5 = waitForChild4:WaitForChild("SoundPart", 1)
+        if not waitForChild5 then
+            DeleteToyRE:FireServer(waitForChild4)
+            return
+        end
+
+        local v7 = tick()
+        while true do
+            _RunService.RenderStepped:Wait()
+            _SetNetworkOwner:FireServer(waitForChild5, waitForChild5.CFrame)
+            if waitForChild5:FindFirstChild("PartOwner") and waitForChild5.PartOwner.Value == _LocalPlayer.Name
+                or (humanoidRootPart2.Position - waitForChild5.Position).Magnitude > 20
+                or tick() - v7 > 1 then
+                break
+            end
+        end
+
+        if waitForChild5:FindFirstChild("PartOwner") and waitForChild5.PartOwner.Value == _LocalPlayer.Name then
+            if not waitForChild5:FindFirstChild("BodyPosition") then
+                local instance = Instance.new("BodyPosition", waitForChild5)
+                instance.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                instance.D = 100
+                instance.Position = Vector3.new(math.random(-100000, 100000), 100000, math.random(-100000, 100000))
+            end
+            waitForChild4.Name = name2
+            return waitForChild4
+        end
+
+        DeleteToyRE:FireServer(waitForChild4)
+        return
+    end
+
+    floodSec:AddButton({
+        Name = 'Trigger Tsunami',
+        Callback = function()
+            u33('Spawning Tsunami shurikens...', 'Tsunami Flood')
+            task.spawn(function()
+                local v24 = {}
+                
+                while #v24 < 10 do
+                    _RunService.RenderStepped:Wait()
+                    table.clear(v24)
+
+                    for _, value16 in ipairs(u17:GetChildren()) do
+                        if value16.Name == "TsunamiShurikens" then
+                            table.insert(v24, value16)
+                        end
+                    end
+
+                    if #v24 < 10 then
+                        makeBodyPosition("TsunamiShurikens")
+                    end
+                end
+
+                local objectModel = _Workspace:FindFirstChild("Map")
+                    and _Workspace.Map:FindFirstChild("AlwaysHereTweenedObjects")
+                    and _Workspace.Map.AlwaysHereTweenedObjects:FindFirstChild("Ocean")
+                    and _Workspace.Map.AlwaysHereTweenedObjects.Ocean:FindFirstChild("Object")
+                    and _Workspace.Map.AlwaysHereTweenedObjects.Ocean.Object:FindFirstChild("ObjectModel")
+
+                if not objectModel then
+                    u33('Ocean not found!', 'Tsunami Flood')
+                    return
+                else
+                    local v25 = nil
+                    for _, value17 in ipairs(objectModel:GetChildren()) do
+                        if value17.Size == Vector3.new(1680, 80, 1712) then
+                            v25 = value17
+                            break
+                        end
+                    end
+
+                    if not v25 then
+                        local v26 = 0
+                        for _, value18 in ipairs(objectModel:GetChildren()) do
+                            if value18:IsA("BasePart") then
+                                local v28 = value18.Size.X * value18.Size.Y * value18.Size.Z
+                                if v28 > v26 then
+                                    v27 = value18
+                                    v26 = v28
+                                end
+                            end
+                        end
+                        v25 = v27
+                    end
+
+                    if not v25 then
+                        u33('Ocean part not found!', 'Tsunami Flood')
+                        return
+                    end
+
+                    for _, value19 in ipairs(u17:GetChildren()) do
+                        if value19.Name == "TsunamiShurikens" then
+                            local stickyPart2 = value19:FindFirstChild("StickyPart")
+                            if stickyPart2 then
+                                stickyPart2.Parent = nil
+                                StickyEvent:FireServer(stickyPart2, v25, CFrame.new(-2300000000, 2300000000, -2300000000))
+                            end
+                        end
+                    end
+
+                    u33('Tsunami triggered successfully!', 'Tsunami Flood')
+                    return
+                end
+            end)
+        end,
+    })
+
+    local floodSec1 = ServerTab:AddSection({ Name = 'Blue Sky' })
+    local StickyEvent1 = _ReplicatedStorage:WaitForChild('PlayerEvents'):WaitForChild('StickyPartEvent')
+
+    local function f31(p31, p41)
+        task.spawn(function()
+            SpawnToyRF:InvokeServer(p31, p41, Vector3.zero)
+        end)
+    end
+
+    local function makeBodyPosition1(name21)
+        local character1 = _LocalPlayer.Character
+        if not character1 then return end
+        local humanoidRootPart21 = character1:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart21 then return end
+
+        while true do
+            task.wait()
+            if humanoidRootPart21 and _LocalPlayer.CanSpawnToy.Value and not _LocalPlayer.InPlot.Value then
+                break
+            end
+        end
+
+        f31("NinjaShuriken", humanoidRootPart21.CFrame * CFrame.new(0, 15, 20))
+        local waitForChild41 = u17:WaitForChild("NinjaShuriken", 1)
+        if not waitForChild41 then return end
+
+        local waitForChild51 = waitForChild41:WaitForChild("SoundPart", 1)
+        if not waitForChild51 then
+            DeleteToyRE:FireServer(waitForChild41)
+            return
+        end
+
+        local v71 = tick()
+        while true do
+            _RunService.RenderStepped:Wait()
+            _SetNetworkOwner:FireServer(waitForChild51, waitForChild51.CFrame)
+            if waitForChild51:FindFirstChild("PartOwner") and waitForChild51.PartOwner.Value == _LocalPlayer.Name
+                or (humanoidRootPart21.Position - waitForChild51.Position).Magnitude > 20
+                or tick() - v71 > 1 then
+                break
+            end
+        end
+
+        if waitForChild51:FindFirstChild("PartOwner") and waitForChild51.PartOwner.Value == _LocalPlayer.Name then
+            if not waitForChild51:FindFirstChild("BodyPosition") then
+                local instance1 = Instance.new("BodyPosition", waitForChild51)
+                instance1.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                instance1.D = 100
+                instance1.Position = Vector3.new(math.random(-100000, 10000000), 100000, math.random(-100000, 100000))
+            end
+            waitForChild41.Name = name21
+            return waitForChild41
+        end
+
+        DeleteToyRE:FireServer(waitForChild41)
+        return
+    end
+
+    floodSec1:AddButton({
+        Name = 'Trigger Blue Sky',
+        Callback = function()
+            u33('Spawning Sky shurikens...', 'Blue Sky')
+            task.spawn(function()
+                local v241 = {}
+                
+                while #v241 < 10 do
+                    _RunService.RenderStepped:Wait()
+                    table.clear(v241)
+
+                    for _, value161 in ipairs(u17:GetChildren()) do
+                        if value161.Name == "TsunamiShurikens1" then
+                            table.insert(v241, value161)
+                        end
+                    end
+
+                    if #v241 < 10 then
+                        makeBodyPosition1("TsunamiShurikens1")
+                    end
+                end
+
+                local objectModel1 = _Workspace:FindFirstChild("Map")
+                    and _Workspace.Map:FindFirstChild("AlwaysHereTweenedObjects")
+                    and _Workspace.Map.AlwaysHereTweenedObjects:FindFirstChild("Ocean")
+                    and _Workspace.Map.AlwaysHereTweenedObjects.Ocean:FindFirstChild("Object")
+                    and _Workspace.Map.AlwaysHereTweenedObjects.Ocean.Object:FindFirstChild("ObjectModel")
+
+                if not objectModel1 then
+                    u33('Blue Sky not found!', 'Blue Sky')
+                    return
+                else
+                    local v251 = nil
+                    for _, value171 in ipairs(objectModel1:GetChildren()) do
+                        if value171.Size == Vector3.new(1680, 80, 1712) then
+                            v251 = value171
+                            break
+                        end
+                    end
+
+                    if not v251 then
+                        local v261 = 0
+                        local v271 = nil
+                        for _, value181 in ipairs(objectModel1:GetChildren()) do
+                            if value181:IsA("BasePart") then
+                                local v281 = value181.Size.X * value181.Size.Y * value181.Size.Z
+                                if v281 > v261 then
+                                    v271 = value181
+                                    v261 = v281
+                                end
+                            end
+                        end
+                        v251 = v271
+                    end
+
+                    if not v251 then
+                        u33('Ocean part not found!', 'Blue Sky')
+                        return
+                    end
+
+                    for _, value191 in ipairs(u17:GetChildren()) do
+                        if value191.Name == "TsunamiShurikens1" then
+                            local stickyPart21 = value191:FindFirstChild("StickyPart")
+                            if stickyPart21 then
+                                stickyPart21.Parent = nil
+                                StickyEvent1:FireServer(stickyPart21, v251, CFrame.new(-2300000000, 2300000000, -2300000000))
+                            end
+                        end
+                    end
+
+                    u33('Blue Sky triggered successfully!', 'Blue Sky')
+                    return
+                end
+            end)
+        end,
+    })
 end)()
 
 u3:Init()
@@ -11687,7 +14325,6 @@ function PlayerRemoving_Added(_)
 	u69(u1339)
 	u69(PlayerToTeleport)
 	u87(RotationAuraList)
-	u87(PlayerToTarget)
 end
 
 local _ = PlayerRemoving_Added
@@ -12537,7 +15174,7 @@ _LocalPlayer.CharacterAdded:Connect(reconnect)
                 end)
             end
         else
-            _LocalPlayer:Kick('Resonance (Auto Reset)')
+            _LocalPlayer:Kick('Auto Reset Flagged So U Had To Get Kicked')
         end
     end
 
