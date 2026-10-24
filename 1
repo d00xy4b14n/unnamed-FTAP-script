@@ -1,4 +1,4 @@
-print('i like femboys')
+print('i hate niggers')
 
 local _Players = game:GetService('Players')
 
@@ -3300,12 +3300,12 @@ local v650 = v646:MakeTab({
 	Icon = 'rbxassetid://17837704089',
 	PremiumOnly = false,
 })
-
 ;(function()
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local UserInputService = game:GetService("UserInputService")
+	local VirtualInputManager = game:GetService("VirtualInputManager")
 
 	local localPlayer = Players.LocalPlayer
 	local currentCamera = workspace.CurrentCamera
@@ -3403,6 +3403,7 @@ local v650 = v646:MakeTab({
 		ExplosionMethod = "BombMissile",
 		MissilesToFire = 1,
 		SelectedTAPlayer = nil,
+		ExpMouseKey = Enum.KeyCode.Unknown,
 	}
 
 	local tbl7 = {
@@ -3501,6 +3502,8 @@ local v650 = v646:MakeTab({
 		},
 		EyeLaser = {
 			Keybind = Enum.KeyCode.U,
+			BuiltInExplosion = false,
+			ExplodingLoop = false,
 			Amount = 6,
 			MaxDistance = 150,
 			Speed = 20,
@@ -4748,6 +4751,34 @@ local v650 = v646:MakeTab({
 			return nil
 		end
 
+		tbl12.StartEyeLaserExplosions = function()
+			if eyeLaser.ExplodingLoop or not tbl8.EyeLaserActive or not eyeLaser.BuiltInExplosion then
+				return
+			end
+			eyeLaser.ExplodingLoop = true
+			local gen = eyeLaser.Generation
+
+			task.spawn(function()
+				while tbl8.EyeLaserActive and eyeLaser.BuiltInExplosion and gen == eyeLaser.Generation do
+					local boundKey = tbl9.ExpMouseKey
+					if boundKey and boundKey ~= Enum.KeyCode.Unknown then
+						pcall(function()
+							VirtualInputManager:SendKeyEvent(true, boundKey, false, game)
+							VirtualInputManager:SendKeyEvent(false, boundKey, false, game)
+						end)
+					else
+						task.spawn(function()
+							tbl12.ExplodeMissile(function()
+								return tbl12.GetHit().Position
+							end, tbl9.ExplosionMethod or "BombMissile", tbl9.MissilesToFire)
+						end)
+					end
+					task.wait(0.1)
+				end
+				eyeLaser.ExplodingLoop = false
+			end)
+		end
+
 		tbl12.SpawnEyeLaserSparklers = function()
 			if eyeLaser.Spawning or not tbl8.EyeLaserActive or #eyeLaser.Models >= eyeLaser.Amount then
 				return
@@ -4885,6 +4916,7 @@ local v650 = v646:MakeTab({
 
 		tbl12.ClearEyeLaser = function()
 			tbl8.EyeLaserActive = false
+			eyeLaser.ExplodingLoop = false
 			eyeLaser.Generation = eyeLaser.Generation + 1
 			tbl12.SetRuntimeConnection("EyeLaser", RunService.Heartbeat, false)
 			pcall(function()
@@ -4909,6 +4941,9 @@ local v650 = v646:MakeTab({
 				eyeLaser.Generation = eyeLaser.Generation + 1
 				tbl12.SetRuntimeConnection("EyeLaser", RunService.Heartbeat, true, tbl12.UpdateEyeLaser)
 				tbl12.SpawnEyeLaserSparklers()
+				if eyeLaser.BuiltInExplosion then
+					tbl12.StartEyeLaserExplosions()
+				end
 			else
 				tbl12.ClearEyeLaser()
 			end
@@ -5658,6 +5693,20 @@ local v650 = v646:MakeTab({
 			Flag = "eyelaser_keybind",
 		})
 
+		laserSec:AddToggle({
+			Name = "Built-in Explosion",
+			Default = el.BuiltInExplosion,
+			Callback = function(v)
+				el.BuiltInExplosion = v
+				if v and tbl8.EyeLaserActive then
+					tbl12.StartEyeLaserExplosions()
+				end
+			end,
+			Flag = "eyelaser_builtin_exp",
+		})
+
+		laserSec:AddLabel("Note: Built-in Explosion macros your 'Explode on Mouse' keybind every 0.05s!")
+
 		UserInputService.InputBegan:Connect(function(inp, gp)
 			if gp or UserInputService:GetFocusedTextBox() then return end
 			if el.Keybind ~= Enum.KeyCode.Unknown and inp.KeyCode == el.Keybind then
@@ -5721,7 +5770,6 @@ local v650 = v646:MakeTab({
 		local expSec = v650:AddSection({ Name = "Explosions" })
 		local selectedExpPlr = nil
 		local expAddKey = Enum.KeyCode.Unknown
-		local expMouseKey = Enum.KeyCode.Unknown
 
 		local expTargetDD = expSec:AddDropdown({
 			Name = "Targets",
@@ -5753,8 +5801,8 @@ local v650 = v646:MakeTab({
 		})
 
 		UserInputService.InputBegan:Connect(function(inp, gp)
-			if gp then return end
-			if expAddKey ~= Enum.KeyCode.Unknown and inp.KeyCode == expAddKey then
+			if UserInputService:GetFocusedTextBox() then return end
+			if not gp and expAddKey ~= Enum.KeyCode.Unknown and inp.KeyCode == expAddKey then
 				local p = selectedExpPlr
 				if mouse.Target then
 					local m = mouse.Target:FindFirstAncestorOfClass("Model")
@@ -5771,7 +5819,7 @@ local v650 = v646:MakeTab({
 					end
 				end
 			end
-			if expMouseKey ~= Enum.KeyCode.Unknown and inp.KeyCode == expMouseKey then
+			if tbl9.ExpMouseKey ~= Enum.KeyCode.Unknown and inp.KeyCode == tbl9.ExpMouseKey then
 				task.spawn(function()
 					tbl12.ExplodeMissile(function()
 						return tbl12.GetHit().Position
@@ -5829,7 +5877,7 @@ local v650 = v646:MakeTab({
 		expSec:AddKeybind({
 			Name = "Explode on Mouse",
 			Default = Enum.KeyCode.Unknown,
-			Callback = function(k) expMouseKey = k end,
+			Callback = function(k) tbl9.ExpMouseKey = k end,
 			Flag = "explosions_mousekey",
 		})
 	end
@@ -12477,141 +12525,6 @@ v1347:AddDropdown({
                     end
 
                     u33('Tsunami triggered successfully!', 'Tsunami Flood')
-                    return
-                end
-            end)
-        end,
-    })
-
-    local floodSec1 = ServerTab:AddSection({ Name = 'Blue Sky' })
-    local StickyEvent1 = _ReplicatedStorage:WaitForChild('PlayerEvents'):WaitForChild('StickyPartEvent')
-
-    local function f31(p31, p41)
-        task.spawn(function()
-            SpawnToyRF:InvokeServer(p31, p41, Vector3.zero)
-        end)
-    end
-
-    local function makeBodyPosition1(name21)
-        local character1 = _LocalPlayer.Character
-        if not character1 then return end
-        local humanoidRootPart21 = character1:FindFirstChild("HumanoidRootPart")
-        if not humanoidRootPart21 then return end
-
-        while true do
-            task.wait()
-            if humanoidRootPart21 and _LocalPlayer.CanSpawnToy.Value and not _LocalPlayer.InPlot.Value then
-                break
-            end
-        end
-
-        f31("NinjaShuriken", humanoidRootPart21.CFrame * CFrame.new(0, 15, 20))
-        local waitForChild41 = u17:WaitForChild("NinjaShuriken", 1)
-        if not waitForChild41 then return end
-
-        local waitForChild51 = waitForChild41:WaitForChild("SoundPart", 1)
-        if not waitForChild51 then
-            DeleteToyRE:FireServer(waitForChild41)
-            return
-        end
-
-        local v71 = tick()
-        while true do
-            _RunService.RenderStepped:Wait()
-            _SetNetworkOwner:FireServer(waitForChild51, waitForChild51.CFrame)
-            if waitForChild51:FindFirstChild("PartOwner") and waitForChild51.PartOwner.Value == _LocalPlayer.Name
-                or (humanoidRootPart21.Position - waitForChild51.Position).Magnitude > 20
-                or tick() - v71 > 1 then
-                break
-            end
-        end
-
-        if waitForChild51:FindFirstChild("PartOwner") and waitForChild51.PartOwner.Value == _LocalPlayer.Name then
-            if not waitForChild51:FindFirstChild("BodyPosition") then
-                local instance1 = Instance.new("BodyPosition", waitForChild51)
-                instance1.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                instance1.D = 100
-                instance1.Position = Vector3.new(math.random(-100000, 10000000), 100000, math.random(-100000, 100000))
-            end
-            waitForChild41.Name = name21
-            return waitForChild41
-        end
-
-        DeleteToyRE:FireServer(waitForChild41)
-        return
-    end
-
-    floodSec1:AddButton({
-        Name = 'Trigger Blue Sky',
-        Callback = function()
-            u33('Spawning Sky shurikens...', 'Blue Sky')
-            task.spawn(function()
-                local v241 = {}
-                
-                while #v241 < 10 do
-                    _RunService.RenderStepped:Wait()
-                    table.clear(v241)
-
-                    for _, value161 in ipairs(u17:GetChildren()) do
-                        if value161.Name == "TsunamiShurikens1" then
-                            table.insert(v241, value161)
-                        end
-                    end
-
-                    if #v241 < 10 then
-                        makeBodyPosition1("TsunamiShurikens1")
-                    end
-                end
-
-                local objectModel1 = _Workspace:FindFirstChild("Map")
-                    and _Workspace.Map:FindFirstChild("AlwaysHereTweenedObjects")
-                    and _Workspace.Map.AlwaysHereTweenedObjects:FindFirstChild("Ocean")
-                    and _Workspace.Map.AlwaysHereTweenedObjects.Ocean:FindFirstChild("Object")
-                    and _Workspace.Map.AlwaysHereTweenedObjects.Ocean.Object:FindFirstChild("ObjectModel")
-
-                if not objectModel1 then
-                    u33('Blue Sky not found!', 'Blue Sky')
-                    return
-                else
-                    local v251 = nil
-                    for _, value171 in ipairs(objectModel1:GetChildren()) do
-                        if value171.Size == Vector3.new(1680, 80, 1712) then
-                            v251 = value171
-                            break
-                        end
-                    end
-
-                    if not v251 then
-                        local v261 = 0
-                        local v271 = nil
-                        for _, value181 in ipairs(objectModel1:GetChildren()) do
-                            if value181:IsA("BasePart") then
-                                local v281 = value181.Size.X * value181.Size.Y * value181.Size.Z
-                                if v281 > v261 then
-                                    v271 = value181
-                                    v261 = v281
-                                end
-                            end
-                        end
-                        v251 = v271
-                    end
-
-                    if not v251 then
-                        u33('Ocean part not found!', 'Blue Sky')
-                        return
-                    end
-
-                    for _, value191 in ipairs(u17:GetChildren()) do
-                        if value191.Name == "TsunamiShurikens1" then
-                            local stickyPart21 = value191:FindFirstChild("StickyPart")
-                            if stickyPart21 then
-                                stickyPart21.Parent = nil
-                                StickyEvent1:FireServer(stickyPart21, v251, CFrame.new(-2300000000, 2300000000, -2300000000))
-                            end
-                        end
-                    end
-
-                    u33('Blue Sky triggered successfully!', 'Blue Sky')
                     return
                 end
             end)
